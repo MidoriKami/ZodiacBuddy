@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Authors>daemitus</Authors>
+    <Company>-</Company>
+    <Version>0.0.0.1</Version>
+    <Description>Complete your Zodiac relic with style.</Description>
+    <Copyright></Copyright>
+    <PackageProjectUrl>https://github.com/daemitus/ZodiacBuddy</PackageProjectUrl>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <Platforms>x64</Platforms>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>$(appdata)\XIVLauncher\devPlugins\ZodiacBuddy\</OutputPath>
+    <!--<OutputPath>bin\$(Configuration)\</OutputPath>-->
+    <NoWarn>CS1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Documentation">
+    <DocumentationFile></DocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="..\res\icon.png" Link="images\icon.png" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblySearchPaths>
+      $(AssemblySearchPaths);
+      $(DalamudLibPath);
+    </AssemblySearchPaths>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <AdditionalFiles Include="..\stylecop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DalamudLinter" Version="1.0.3" />
+    <PackageReference Include="DalamudPackager" Version="2.1.2" />
+    <PackageReference Include="ILRepack" Version="2.0.18" GeneratePathProperty="true" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.333">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <ProjectReference Include="..\lib\FFXIVClientStructs\FFXIVClientStructs\FFXIVClientStructs.csproj" />
+    <Reference Include="Newtonsoft.Json" Private="False" />
+    <Reference Include="Dalamud" Private="False" />
+    <Reference Include="ImGui.NET" Private="False" />
+    <Reference Include="Lumina" Private="False" />
+    <Reference Include="Lumina.Excel" Private="False" />
+  </ItemGroup>
+
+  <Target Name="ILRepack" AfterTargets="Build">
+    <ItemGroup>
+      <InputAssemblies Include="$(TargetPath)" />
+      <InputAssemblies Include="$(TargetDir)*.dll" Exclude="$(TargetPath)" />
+    </ItemGroup>
+    <Exec Command="$(PkgILRepack)\tools\ILRepack.exe /lib:$(DalamudLibPath) /out:$(TargetDir)$(TargetFileName) @(InputAssemblies, ' ')" />
+  </Target>
+
+  <Target Name="CleanOutDir" AfterTargets="ILRepack">
+    <ItemGroup>
+      <DeleteFiles Include="$(TargetDir)*.dll" Exclude="$(TargetDir)$(TargetName).dll" />
+      <DeleteFiles Include="$(TargetDir)*.pdb" Exclude="$(TargetDir)$(TargetName).pdb" />
+      <DeleteFiles Include="$(TargetDir)*.xml" />
+    </ItemGroup>
+    <Message Text="Deleting @(DeleteFiles)" Importance="high" />
+    <Delete Files="@(DeleteFiles)" />
+  </Target>
+</Project>
