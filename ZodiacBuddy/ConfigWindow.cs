@@ -25,7 +25,14 @@ namespace ZodiacBuddy
         /// <inheritdoc/>
         public override void Draw()
         {
-            ImGui.TextWrapped("Currently the only implemented feature is teleporting to your target when clicking on pictures in the Trial of the Braves books.\n\nEnjoy!");
+            ImGui.TextWrapped("Currently the only implemented feature is teleporting to your target when clicking on pictures in the Trial of the Braves books.\n\nEnjoy!\n");
+
+            var echo = Service.Configuration.BraveEchoTarget;
+            if (ImGui.Checkbox("Echo Brave target selection to chat", ref echo))
+            {
+                Service.Configuration.BraveEchoTarget = echo;
+                Service.Configuration.Save();
+            }
         }
     }
 }
