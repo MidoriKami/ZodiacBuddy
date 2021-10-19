@@ -18,8 +18,7 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>$(appdata)\XIVLauncher\devPlugins\ZodiacBuddy\</OutputPath>
-    <!--<OutputPath>bin\$(Configuration)\</OutputPath>-->
+    <OutputPath>bin\$(Configuration)\</OutputPath>
     <NoWarn>CS1591</NoWarn>
   </PropertyGroup>
 
