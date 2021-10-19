@@ -240,7 +240,7 @@ namespace ZodiacBuddy
                 360 => new MapLinkPayload(156,  25, 11.0f, 15.1f), // 5th Cohort vanguard     // Mor Dhona
                 361 => new MapLinkPayload(180,  30, 23.9f,  7.7f), // synthetic doblyn        // Outer La Noscea
                 362 => new MapLinkPayload(140,  20, 11.0f,  6.2f), // 4th Cohort hoplomachus  // Western Thanalan
-                363 => new MapLinkPayload(146,  23, 26.1f, 21.1f), // Zanr'ak pugilist        // Southern Thanalan
+                363 => new MapLinkPayload(146,  23, 21.5f, 25.2f), // Zanr'ak pugilist        // Southern Thanalan
                 364 => new MapLinkPayload(147,  24, 22.1f, 26.6f), // basilisk                // Northern Thanalan
                 365 => new MapLinkPayload(137,  17, 29.5f, 20.8f), // 2nd Cohort hoplomachus  // Eastern La Noscea
                 366 => new MapLinkPayload(156,  25, 17.0f, 16.0f), // raging harrier          // Mor Dhona
@@ -474,6 +474,8 @@ namespace ZodiacBuddy
                     : selectedTarget.ZoneName;
 
                 // PluginLog.Debug($"Target selected: {selectedTarget.Name} in {zoneName}.");
+                if (Service.Configuration.BraveEchoTarget)
+                    Service.ChatGui.Print($"[{this.Name}] Target selected: {selectedTarget.Name} in {zoneName}.");
 
                 var aetheryteName = this.GetNearestAetheryte(selectedTarget.Position);
                 if (string.IsNullOrEmpty(aetheryteName))
