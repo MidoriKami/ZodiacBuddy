@@ -63,6 +63,12 @@ namespace ZodiacBuddy
         internal static DataManager DataManager { get; private set; } = null!;
 
         /// <summary>
+        /// Gets the Dalamud game gui.
+        /// </summary>
+        [PluginService]
+        internal static GameGui GameGui { get; private set; } = null!;
+
+        /// <summary>
         /// Gets the Dalamud job gauges.
         /// </summary>
         [PluginService]

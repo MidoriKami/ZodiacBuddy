@@ -491,6 +491,7 @@ namespace ZodiacBuddy
                 else
                 {
                     // PluginLog.Debug($"Aetheryte chosen: {aetheryteName}");
+                    Service.GameGui.OpenMapWithMapLink(selectedTarget.Position);
                     if (!Service.CommandManager.ProcessCommand($"/tp {aetheryteName}"))
                     {
                         PluginLog.Warning($"Teleport command failed, teleporter is probably not installed");
