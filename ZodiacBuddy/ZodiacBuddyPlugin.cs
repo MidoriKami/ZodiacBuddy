@@ -193,21 +193,12 @@ namespace ZodiacBuddy
                         var leveID = leve.RowId;
                         var leveType = leve.LeveAssignmentType.Value!;
 
-                        var level = leve.LevelStart.Value!;
+                        var position = this.GetLevelPosition(leveID);
 
-                        var zone = level.Territory.Value!;
-                        var zoneName = zone.PlaceName.Value!.Name.ToString();
-                        var zoneID = zone.RowId;
+                        var zoneName = position.TerritoryType.PlaceName.Value!.Name.ToString();
+                        var zoneID = position.TerritoryType.RowId;
 
                         var name = leve.Name.ToString();
-                        if (leveType.IsFaction)
-                            name += $"({leveType.Name})";
-
-                        var position = new MapLinkPayload(
-                            level.Territory.Value!.RowId,
-                            level.Map.Value!.RowId,
-                            level.X,
-                            level.Z);
 
                         // PluginLog.Debug($"Loaded leve {leveID}: {name}");
                         braveBook.Leves[i] = new BraveTarget()
@@ -385,6 +376,39 @@ namespace ZodiacBuddy
             };
         }
 
+        private MapLinkPayload GetLevelPosition(uint leveID)
+        {
+            return leveID switch
+            {
+                #pragma warning disable format
+                643 => new MapLinkPayload(147, 24, 22.0f, 29.0f), // Subduing the Subprime           // Northern Thanalan
+                644 => new MapLinkPayload(147, 24, 22.0f, 29.0f), // Necrologos: Pale Oblation       // Northern Thanalan
+                645 => new MapLinkPayload(147, 24, 22.0f, 29.0f), // Don't Forget to Cry             // Northern Thanalan
+                646 => new MapLinkPayload(147, 24, 22.0f, 29.0f), // Circling the Ceruleum           // Northern Thanalan
+                647 => new MapLinkPayload(147, 24, 22.0f, 29.0f), // Someone's in the Doghouse       // Northern Thanalan
+                649 => new MapLinkPayload(155, 53, 13.0f, 17.0f), // Necrologos: Whispers of the Gem // Coerthas Central Highlands
+                650 => new MapLinkPayload(155, 53, 13.0f, 17.0f), // Got a Gut Feeling about This    // Coerthas Central Highlands
+                652 => new MapLinkPayload(155, 53, 13.0f, 17.0f), // The Area's a Bit Sketchy        // Coerthas Central Highlands
+                657 => new MapLinkPayload(156, 25, 30.0f, 13.0f), // Necrologos: The Liminal Ones    // Mor Dhona
+                658 => new MapLinkPayload(156, 25, 00.0f, 00.0f), // Big, Bad Idea                   // Mor Dhona
+                659 => new MapLinkPayload(156, 25, 00.0f, 00.0f), // Put Your Stomp on It            // Mor Dhona
+                848 => new MapLinkPayload(155, 53, 12.0f, 17.0f), // Someone's Got a Big Mouth       // Coerthas Central Highlands
+                849 => new MapLinkPayload(155, 53, 12.0f, 17.0f), // An Imp Mobile                   // Coerthas Central Highlands
+                853 => new MapLinkPayload(155, 53, 12.0f, 17.0f), // Yellow Is the New Black         // Coerthas Central Highlands
+                855 => new MapLinkPayload(155, 53, 12.0f, 17.0f), // The Bloodhounds of Coerthas     // Coerthas Central Highlands
+                859 => new MapLinkPayload(155, 53, 12.0f, 17.0f), // No Big Whoop                    // Coerthas Central Highlands
+                860 => new MapLinkPayload(155, 53, 12.0f, 17.0f), // If You Put It That Way          // Coerthas Central Highlands
+                863 => new MapLinkPayload(156, 25, 31.0f, 12.0f), // One Big Problem Solved          // Mor Dhona
+                865 => new MapLinkPayload(156, 25, 31.0f, 12.0f), // Go Home to Mama                 // Mor Dhona
+                868 => new MapLinkPayload(156, 25, 31.0f, 12.0f), // The Awry Salvages               // Mor Dhona
+                870 => new MapLinkPayload(156, 25, 31.0f, 12.0f), // Get off Our Lake                // Mor Dhona
+                873 => new MapLinkPayload(156, 25, 31.0f, 12.0f), // Who Writes History              // Mor Dhona
+                875 => new MapLinkPayload(156, 25, 31.0f, 12.0f), // The Museum Is Closed            // Mor Dhona
+                #pragma warning restore format
+                _ => throw new ArgumentException($"Unregistered leve: {leveID}"),
+            };
+        }
+
         private unsafe void ReceiveEventDetour(IntPtr addon, uint which, IntPtr eventData, IntPtr inputData)
         {
             try
@@ -512,17 +536,12 @@ namespace ZodiacBuddy
             var closestAetheryteName = string.Empty;
             var closestDistance = double.MaxValue;
 
-            static float ConvertMapMarkerToMapCoordinate(int pos, float scale)
-            {
-                float num = scale / 100f;
-                var rawPosition = (int)((float)(pos - 1024.0) / num * 1000f);
-                return ConvertRawPositionToMapCoordinate(rawPosition, scale);
-            }
-
             static float ConvertRawPositionToMapCoordinate(int pos, float scale)
             {
-                var num = scale / 100f;
-                return (float)((((pos / 1000f * num) + 1024.0) / 2048.0 * 41.0 / num) + 1.0);
+                var c = scale / 100.0f;
+                var scaledPos = pos * c / 1000.0f;
+
+                return (41.0f / c * ((scaledPos + 1024.0f) / 2048.0f)) + 1.0f;
             }
 
             var aetherytes = Service.DataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.Aetheryte>()!;
@@ -547,8 +566,8 @@ namespace ZodiacBuddy
                     return string.Empty;
                 }
 
-                var aetherX = ConvertMapMarkerToMapCoordinate(mapMarker.X, scale);
-                var aetherY = ConvertMapMarkerToMapCoordinate(mapMarker.Y, scale);
+                var aetherX = ConvertRawPositionToMapCoordinate(mapMarker.X, scale);
+                var aetherY = ConvertRawPositionToMapCoordinate(mapMarker.Y, scale);
                 var aetherName = aetheryte.PlaceName.Value!.Name;
                 // PluginLog.Debug($"Aetheryte found: {aetherName} ({aetherX} ,{aetherY})");
 
