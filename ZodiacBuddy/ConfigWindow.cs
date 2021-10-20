@@ -27,10 +27,10 @@ namespace ZodiacBuddy
         {
             ImGui.TextWrapped("Currently the only implemented feature is teleporting to your target when clicking on pictures in the Trial of the Braves books.\n\nEnjoy!\n");
 
-            var echo = Service.Configuration.BraveEchoTarget;
-            if (ImGui.Checkbox("Echo Brave target selection to chat", ref echo))
+            var braveEcho = Service.Configuration.BraveEchoTarget;
+            if (ImGui.Checkbox("Echo Brave target selection to chat", ref braveEcho))
             {
-                Service.Configuration.BraveEchoTarget = echo;
+                Service.Configuration.BraveEchoTarget = braveEcho;
                 Service.Configuration.Save();
             }
         }
