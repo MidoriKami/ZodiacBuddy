@@ -346,7 +346,7 @@ namespace ZodiacBuddy
             return fateID switch
             {
                 #pragma warning disable format
-                317 => new MapLinkPayload(139, 19, 26.0f, 18.0f), // Surprise                   // Upper La Noscea
+                317 => new MapLinkPayload(139, 19, 26.8f, 18.2f), // Surprise                   // Upper La Noscea
                 424 => new MapLinkPayload(146, 23, 21.0f, 16.0f), // Heroes of the 2nd          // Southern Thanalan
                 430 => new MapLinkPayload(146, 23, 24.0f, 26.0f), // Return to Cinder           // Southern Thanalan
                 475 => new MapLinkPayload(155, 53, 34.0f, 13.0f), // Bellyful                   // Coerthas Central Highlands
@@ -392,8 +392,8 @@ namespace ZodiacBuddy
                 650 => new MapLinkPayload(155, 53, 13.0f, 17.0f), // Got a Gut Feeling about This    // Coerthas Central Highlands
                 652 => new MapLinkPayload(155, 53, 13.0f, 17.0f), // The Area's a Bit Sketchy        // Coerthas Central Highlands
                 657 => new MapLinkPayload(156, 25, 30.0f, 13.0f), // Necrologos: The Liminal Ones    // Mor Dhona
-                658 => new MapLinkPayload(156, 25, 00.0f, 00.0f), // Big, Bad Idea                   // Mor Dhona
-                659 => new MapLinkPayload(156, 25, 00.0f, 00.0f), // Put Your Stomp on It            // Mor Dhona
+                658 => new MapLinkPayload(156, 25, 30.0f, 13.0f), // Big, Bad Idea                   // Mor Dhona
+                659 => new MapLinkPayload(156, 25, 30.0f, 13.0f), // Put Your Stomp on It            // Mor Dhona
                 848 => new MapLinkPayload(155, 53, 12.0f, 17.0f), // Someone's Got a Big Mouth       // Coerthas Central Highlands
                 849 => new MapLinkPayload(155, 53, 12.0f, 17.0f), // An Imp Mobile                   // Coerthas Central Highlands
                 853 => new MapLinkPayload(155, 53, 12.0f, 17.0f), // Yellow Is the New Black         // Coerthas Central Highlands
