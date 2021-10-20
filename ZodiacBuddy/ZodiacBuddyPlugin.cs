@@ -171,8 +171,8 @@ namespace ZodiacBuddy
                 if (Service.Configuration.BraveEchoTarget)
                     Service.ChatGui.Print($"[{this.Name}] Target selected: {selectedTarget.Name} in {zoneName}.");
 
-                var aetheryteName = this.GetNearestAetheryte(selectedTarget.Position);
-                if (string.IsNullOrEmpty(aetheryteName))
+                var aetheryteId = this.GetNearestAetheryte(selectedTarget.Position);
+                if (aetheryteId == 0)
                 {
                     if (index == 1)
                     { // Dungeons
@@ -186,13 +186,8 @@ namespace ZodiacBuddy
                 }
                 else
                 {
-                    // PluginLog.Debug($"Aetheryte chosen: {aetheryteName}");
                     Service.GameGui.OpenMapWithMapLink(selectedTarget.Position);
-                    if (!Service.CommandManager.ProcessCommand($"/tp {aetheryteName}"))
-                    {
-                        PluginLog.Warning($"Teleport command failed, teleporter is probably not installed");
-                        Service.ChatGui.PrintError($"[{this.Name}] Teleport failed. This feature requires the plugin \"Teleporter\" to be installed.");
-                    }
+                    Teleporter.Teleport(aetheryteId);
                 }
             }
             catch (Exception ex)
@@ -201,9 +196,9 @@ namespace ZodiacBuddy
             }
         }
 
-        private string GetNearestAetheryte(MapLinkPayload mapLink)
+        private uint GetNearestAetheryte(MapLinkPayload mapLink)
         {
-            var closestAetheryteName = string.Empty;
+            var closestAetheryteID = 0u;
             var closestDistance = double.MaxValue;
 
             static float ConvertRawPositionToMapCoordinate(int pos, float scale)
@@ -233,23 +228,23 @@ namespace ZodiacBuddy
                 if (mapMarker == default)
                 {
                     // PluginLog.Debug($"Could not find aetheryte: {name}");
-                    return string.Empty;
+                    return 0;
                 }
 
                 var aetherX = ConvertRawPositionToMapCoordinate(mapMarker.X, scale);
                 var aetherY = ConvertRawPositionToMapCoordinate(mapMarker.Y, scale);
-                var aetherName = aetheryte.PlaceName.Value!.Name;
-                // PluginLog.Debug($"Aetheryte found: {aetherName} ({aetherX} ,{aetherY})");
 
+                // var aetheryteName = aetheryte.PlaceName.Value!;
+                // PluginLog.Debug($"Aetheryte found: {aetherName} ({aetherX} ,{aetherY})");
                 var distance = Math.Pow(aetherX - mapLink.XCoord, 2) + Math.Pow(aetherY - mapLink.YCoord, 2);
                 if (distance < closestDistance)
                 {
                     closestDistance = distance;
-                    closestAetheryteName = aetherName;
+                    closestAetheryteID = aetheryte.RowId;
                 }
             }
 
-            return closestAetheryteName;
+            return closestAetheryteID;
         }
 
         private void OnOpenConfigUi()
