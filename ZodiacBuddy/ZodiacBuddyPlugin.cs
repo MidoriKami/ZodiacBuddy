@@ -192,13 +192,15 @@ namespace ZodiacBuddy
                         var leve = bookRow.Leve[i].Value!;
                         var leveID = leve.RowId;
                         var leveType = leve.LeveAssignmentType.Value!;
+                        var leveName = leve.Name.ToString();
+                        var leveClient = leve.LeveClient.Value!.Name.ToString();
 
                         var position = this.GetLevelPosition(leveID);
 
                         var zoneName = position.TerritoryType.PlaceName.Value!.Name.ToString();
                         var zoneID = position.TerritoryType.RowId;
 
-                        var name = leve.Name.ToString();
+                        var name = $"{leveName} ({leveClient})";
 
                         // PluginLog.Debug($"Loaded leve {leveID}: {name}");
                         braveBook.Leves[i] = new BraveTarget()
