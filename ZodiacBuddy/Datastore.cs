@@ -313,13 +313,13 @@ namespace ZodiacBuddy
                 577 => new MapLinkPayload(138, 18, 14.0f, 34.0f), // The King's Justice         // Western La Noscea
                 587 => new MapLinkPayload(180, 30, 25.0f, 16.0f), // Schism                     // Outer La Noscea
                 589 => new MapLinkPayload(180, 30, 25.0f, 17.0f), // Make It Rain               // Outer La Noscea
-                604 => new MapLinkPayload(148, 04, 11.0f, 18.0f), // In Spite of It All         // Central Shroud
-                611 => new MapLinkPayload(152, 05, 27.0f, 21.0f), // The Enmity of My Enemy     // East Shroud
-                616 => new MapLinkPayload(152, 05, 32.0f, 14.0f), // Breaking Dawn              // East Shroud
-                620 => new MapLinkPayload(152, 05, 23.0f, 14.0f), // Everything's Better        // East Shroud
-                628 => new MapLinkPayload(154, 07, 21.0f, 19.0f), // What Gored Before          // North Shroud
-                632 => new MapLinkPayload(154, 07, 21.0f, 19.0f), // Rude Awakening             // North Shroud
-                633 => new MapLinkPayload(154, 07, 19.0f, 20.0f), // Air Supply                 // North Shroud
+                604 => new MapLinkPayload(148,  4, 11.0f, 18.0f), // In Spite of It All         // Central Shroud
+                611 => new MapLinkPayload(152,  5, 27.0f, 21.0f), // The Enmity of My Enemy     // East Shroud
+                616 => new MapLinkPayload(152,  5, 32.0f, 14.0f), // Breaking Dawn              // East Shroud
+                620 => new MapLinkPayload(152,  5, 23.0f, 14.0f), // Everything's Better        // East Shroud
+                628 => new MapLinkPayload(153,  6, 32.0f, 25.0f), // What Gored Before          // South Shroud
+                632 => new MapLinkPayload(154,  7, 21.0f, 19.0f), // Rude Awakening             // North Shroud
+                633 => new MapLinkPayload(154,  7, 19.0f, 20.0f), // Air Supply                 // North Shroud
                 642 => new MapLinkPayload(147, 24, 21.0f, 29.0f), // The Ceruleum Road          // Northern Thanalan
                 #pragma warning restore format
                 _ => throw new ArgumentException($"Unregistered FATE: {fateID}"),
