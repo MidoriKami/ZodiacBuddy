@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -75,8 +74,8 @@ namespace ZodiacBuddy
 
             Service.CommandManager.RemoveHandler(Command);
 
-            Service.Interface.UiBuilder.OpenConfigUi -= this.OnOpenConfigUi;
             Service.Interface.UiBuilder.Draw -= this.windowSystem.Draw;
+            Service.Interface.UiBuilder.OpenConfigUi -= this.OnOpenConfigUi;
         }
 
         private unsafe void ReceiveEventDetour(IntPtr addon, uint which, IntPtr eventData, IntPtr inputData)
@@ -95,73 +94,35 @@ namespace ZodiacBuddy
                 var eventDataPtr = (EventData*)eventData;
                 var targetComponent = eventDataPtr->Target;
 
-                unsafe static IntPtr GetOwnerNode(AtkComponentCheckBox* checkbox) => new(checkbox->AtkComponentButton.AtkComponentBase.OwnerNode);
+                unsafe static bool IsOwnerNode(IntPtr target, AtkComponentCheckBox* checkbox) => target == new IntPtr(checkbox->AtkComponentButton.AtkComponentBase.OwnerNode);
 
-                BraveTarget selectedTarget;
-
-                if (index == 0)
-                { // Enemies
-                    var typeIndex = targetComponent switch
-                    {
-                        IntPtr t when t == GetOwnerNode(addonPtr->Enemy0.CheckBox) => 0,
-                        IntPtr t when t == GetOwnerNode(addonPtr->Enemy1.CheckBox) => 1,
-                        IntPtr t when t == GetOwnerNode(addonPtr->Enemy2.CheckBox) => 2,
-                        IntPtr t when t == GetOwnerNode(addonPtr->Enemy3.CheckBox) => 3,
-                        IntPtr t when t == GetOwnerNode(addonPtr->Enemy4.CheckBox) => 4,
-                        IntPtr t when t == GetOwnerNode(addonPtr->Enemy5.CheckBox) => 5,
-                        IntPtr t when t == GetOwnerNode(addonPtr->Enemy6.CheckBox) => 6,
-                        IntPtr t when t == GetOwnerNode(addonPtr->Enemy7.CheckBox) => 7,
-                        IntPtr t when t == GetOwnerNode(addonPtr->Enemy8.CheckBox) => 8,
-                        IntPtr t when t == GetOwnerNode(addonPtr->Enemy9.CheckBox) => 9,
-                        _ => throw new ArgumentException("Unexpected enemy index"),
-                    };
-
-                    selectedTarget = Datastore.BraveBooks[bookID].Enemies[typeIndex];
-                    // PluginLog.Debug($"Enemies {selectedTarget.Name}");
-                }
-                else if (index == 1)
-                { // Dungeons
-                    var typeIndex = targetComponent switch
-                    {
-                        IntPtr t when t == GetOwnerNode(addonPtr->Dungeon0.CheckBox) => 0,
-                        IntPtr t when t == GetOwnerNode(addonPtr->Dungeon1.CheckBox) => 1,
-                        IntPtr t when t == GetOwnerNode(addonPtr->Dungeon2.CheckBox) => 2,
-                        _ => throw new ArgumentException("Unexpected dungeon index"),
-                    };
-
-                    selectedTarget = Datastore.BraveBooks[bookID].Dungeons[typeIndex];
-                    // PluginLog.Debug($"Dungeons {selectedTarget.Name}");
-                }
-                else if (index == 2)
-                { // FATEs
-                    var typeIndex = targetComponent switch
-                    {
-                        IntPtr t when t == GetOwnerNode(addonPtr->Fate0.CheckBox) => 0,
-                        IntPtr t when t == GetOwnerNode(addonPtr->Fate1.CheckBox) => 1,
-                        IntPtr t when t == GetOwnerNode(addonPtr->Fate2.CheckBox) => 2,
-                        _ => throw new ArgumentException("Unexpected fate index"),
-                    };
-
-                    selectedTarget = Datastore.BraveBooks[bookID].Fates[typeIndex];
-                    // PluginLog.Debug($"FATEs {selectedTarget.Name}");
-                }
-                else if (index == 3)
-                { // Leves
-                    var typeIndex = targetComponent switch
-                    {
-                        IntPtr t when t == GetOwnerNode(addonPtr->Leve0.CheckBox) => 0,
-                        IntPtr t when t == GetOwnerNode(addonPtr->Leve1.CheckBox) => 1,
-                        IntPtr t when t == GetOwnerNode(addonPtr->Leve2.CheckBox) => 2,
-                        _ => throw new ArgumentException("Unexpected leve index"),
-                    };
-
-                    selectedTarget = Datastore.BraveBooks[bookID].Leves[typeIndex];
-                    // PluginLog.Debug($"Leves {selectedTarget.Name}");
-                }
-                else
+                var selectedTarget = targetComponent switch
                 {
-                    throw new ArgumentException($"Unexpected list index: {index}");
-                }
+                    // Enemies
+                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy0.CheckBox) => Datastore.BraveBooks[bookID].Enemies[0],
+                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy1.CheckBox) => Datastore.BraveBooks[bookID].Enemies[1],
+                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy2.CheckBox) => Datastore.BraveBooks[bookID].Enemies[2],
+                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy3.CheckBox) => Datastore.BraveBooks[bookID].Enemies[3],
+                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy4.CheckBox) => Datastore.BraveBooks[bookID].Enemies[4],
+                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy5.CheckBox) => Datastore.BraveBooks[bookID].Enemies[5],
+                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy6.CheckBox) => Datastore.BraveBooks[bookID].Enemies[6],
+                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy7.CheckBox) => Datastore.BraveBooks[bookID].Enemies[7],
+                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy8.CheckBox) => Datastore.BraveBooks[bookID].Enemies[8],
+                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy9.CheckBox) => Datastore.BraveBooks[bookID].Enemies[9],
+                    // Dungeons
+                    IntPtr t when index == 1 && IsOwnerNode(t, addonPtr->Dungeon0.CheckBox) => Datastore.BraveBooks[bookID].Dungeons[0],
+                    IntPtr t when index == 1 && IsOwnerNode(t, addonPtr->Dungeon1.CheckBox) => Datastore.BraveBooks[bookID].Dungeons[1],
+                    IntPtr t when index == 1 && IsOwnerNode(t, addonPtr->Dungeon2.CheckBox) => Datastore.BraveBooks[bookID].Dungeons[2],
+                    // FATEs
+                    IntPtr t when index == 2 && IsOwnerNode(t, addonPtr->Fate0.CheckBox) => Datastore.BraveBooks[bookID].Fates[0],
+                    IntPtr t when index == 2 && IsOwnerNode(t, addonPtr->Fate1.CheckBox) => Datastore.BraveBooks[bookID].Fates[1],
+                    IntPtr t when index == 2 && IsOwnerNode(t, addonPtr->Fate2.CheckBox) => Datastore.BraveBooks[bookID].Fates[2],
+                    // Leves
+                    IntPtr t when index == 3 && IsOwnerNode(t, addonPtr->Leve0.CheckBox) => Datastore.BraveBooks[bookID].Leves[0],
+                    IntPtr t when index == 3 && IsOwnerNode(t, addonPtr->Leve1.CheckBox) => Datastore.BraveBooks[bookID].Leves[1],
+                    IntPtr t when index == 3 && IsOwnerNode(t, addonPtr->Leve2.CheckBox) => Datastore.BraveBooks[bookID].Leves[2],
+                    _ => throw new ArgumentException($"Unexpected index and/or node: {index}, {targetComponent:X}"),
+                };
 
                 var zoneName = !string.IsNullOrEmpty(selectedTarget.LocationName)
                     ? $"{selectedTarget.ZoneName}, {selectedTarget.LocationName}"
@@ -176,7 +137,14 @@ namespace ZodiacBuddy
                 {
                     if (index == 1)
                     { // Dungeons
-                        Service.ChatGui.Print($"[{this.Name}] Maybe someday this will queue you for a dungeon.");
+                        // Service.ChatGui.Print($"[{this.Name}] Maybe someday this will queue you for a dungeon.");
+                        if (!this.ShowDutyFinder())
+                        {
+                            Service.ChatGui.Print($"[{this.Name}] Could not display the duty finder. Please report this to the developer.");
+                            return;
+                        }
+
+                        // TODO configure the duty finder.
                     }
                     else
                     {
@@ -245,6 +213,30 @@ namespace ZodiacBuddy
             }
 
             return closestAetheryteID;
+        }
+
+        private unsafe bool ShowDutyFinder()
+        {
+            var alreadyOpen = Service.GameGui.GetAddonByName("ContentsFinder", 1) != IntPtr.Zero;
+            if (alreadyOpen)
+                return true;
+
+            var framework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance();
+            if (framework == null)
+            {
+                PluginLog.Error("AgentLookup: Framework was null");
+                return false;
+            }
+
+            var uiModule = framework->GetUiModule();
+            if (uiModule == null)
+            {
+                PluginLog.Error("AgentLookup: UiModule was null");
+                return false;
+            }
+
+            uiModule->ExecuteMainCommand(0x21);
+            return true;
         }
 
         private void OnOpenConfigUi()
