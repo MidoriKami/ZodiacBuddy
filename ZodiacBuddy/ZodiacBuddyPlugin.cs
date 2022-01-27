@@ -8,8 +8,13 @@ using Dalamud.Hooking;
 using Dalamud.Interface.Windowing;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+
+using Sheets = Lumina.Excel.GeneratedSheets;
 
 namespace ZodiacBuddy
 {
@@ -23,6 +28,7 @@ namespace ZodiacBuddy
         private readonly WindowSystem windowSystem;
         private readonly ConfigWindow configWindow;
         private readonly Hook<ReceiveEventDelegate> receiveEventHook;
+        private readonly OpenDutyDelegate openDuty;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ZodiacBuddyPlugin"/> class.
@@ -51,18 +57,15 @@ namespace ZodiacBuddy
                 ShowInHelp = true,
             });
 
+            this.openDuty = Marshal.GetDelegateForFunctionPointer<OpenDutyDelegate>(Service.Address.AgentContentsFinderOpenRegularDutyAddress);
+
             this.receiveEventHook = new Hook<ReceiveEventDelegate>(Service.Address.AddonRelicNoteBookReceiveEventAddress, this.ReceiveEventDetour);
             this.receiveEventHook.Enable();
         }
 
-        /// <summary>
-        /// Not require AtkUnitBase.ReceiveEvent, but one step removed. Called when a2==25.
-        /// </summary>
-        /// <param name="addon">Type receiving the event.</param>
-        /// <param name="which">Internal routing number.</param>
-        /// <param name="eventData">Event data.</param>
-        /// <param name="inputData">Keyboard and mouse data.</param>
-        internal unsafe delegate void ReceiveEventDelegate(IntPtr addon, uint which, IntPtr eventData, IntPtr inputData);
+        private delegate void ReceiveEventDelegate(IntPtr addon, uint which, IntPtr eventData, IntPtr inputData);
+
+        private delegate IntPtr OpenDutyDelegate(IntPtr agent, uint contentFinderCondition, byte a3);
 
         /// <inheritdoc/>
         public string Name => "Zodiac Buddy";
@@ -78,93 +81,7 @@ namespace ZodiacBuddy
             Service.Interface.UiBuilder.OpenConfigUi -= this.OnOpenConfigUi;
         }
 
-        private unsafe void ReceiveEventDetour(IntPtr addon, uint which, IntPtr eventData, IntPtr inputData)
-        {
-            try
-            {
-                var relicNote = FFXIVClientStructs.FFXIV.Client.Game.UI.RelicNote.Instance();
-                if (relicNote == null)
-                    return;
-
-                var bookID = relicNote->RelicNoteID;
-
-                var addonPtr = (AddonRelicNoteBook*)addon;
-                var index = addonPtr->CategoryList->SelectedItemIndex;
-
-                var eventDataPtr = (EventData*)eventData;
-                var targetComponent = eventDataPtr->Target;
-
-                unsafe static bool IsOwnerNode(IntPtr target, AtkComponentCheckBox* checkbox) => target == new IntPtr(checkbox->AtkComponentButton.AtkComponentBase.OwnerNode);
-
-                var selectedTarget = targetComponent switch
-                {
-                    // Enemies
-                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy0.CheckBox) => Datastore.BraveBooks[bookID].Enemies[0],
-                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy1.CheckBox) => Datastore.BraveBooks[bookID].Enemies[1],
-                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy2.CheckBox) => Datastore.BraveBooks[bookID].Enemies[2],
-                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy3.CheckBox) => Datastore.BraveBooks[bookID].Enemies[3],
-                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy4.CheckBox) => Datastore.BraveBooks[bookID].Enemies[4],
-                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy5.CheckBox) => Datastore.BraveBooks[bookID].Enemies[5],
-                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy6.CheckBox) => Datastore.BraveBooks[bookID].Enemies[6],
-                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy7.CheckBox) => Datastore.BraveBooks[bookID].Enemies[7],
-                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy8.CheckBox) => Datastore.BraveBooks[bookID].Enemies[8],
-                    IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy9.CheckBox) => Datastore.BraveBooks[bookID].Enemies[9],
-                    // Dungeons
-                    IntPtr t when index == 1 && IsOwnerNode(t, addonPtr->Dungeon0.CheckBox) => Datastore.BraveBooks[bookID].Dungeons[0],
-                    IntPtr t when index == 1 && IsOwnerNode(t, addonPtr->Dungeon1.CheckBox) => Datastore.BraveBooks[bookID].Dungeons[1],
-                    IntPtr t when index == 1 && IsOwnerNode(t, addonPtr->Dungeon2.CheckBox) => Datastore.BraveBooks[bookID].Dungeons[2],
-                    // FATEs
-                    IntPtr t when index == 2 && IsOwnerNode(t, addonPtr->Fate0.CheckBox) => Datastore.BraveBooks[bookID].Fates[0],
-                    IntPtr t when index == 2 && IsOwnerNode(t, addonPtr->Fate1.CheckBox) => Datastore.BraveBooks[bookID].Fates[1],
-                    IntPtr t when index == 2 && IsOwnerNode(t, addonPtr->Fate2.CheckBox) => Datastore.BraveBooks[bookID].Fates[2],
-                    // Leves
-                    IntPtr t when index == 3 && IsOwnerNode(t, addonPtr->Leve0.CheckBox) => Datastore.BraveBooks[bookID].Leves[0],
-                    IntPtr t when index == 3 && IsOwnerNode(t, addonPtr->Leve1.CheckBox) => Datastore.BraveBooks[bookID].Leves[1],
-                    IntPtr t when index == 3 && IsOwnerNode(t, addonPtr->Leve2.CheckBox) => Datastore.BraveBooks[bookID].Leves[2],
-                    _ => throw new ArgumentException($"Unexpected index and/or node: {index}, {targetComponent:X}"),
-                };
-
-                var zoneName = !string.IsNullOrEmpty(selectedTarget.LocationName)
-                    ? $"{selectedTarget.ZoneName}, {selectedTarget.LocationName}"
-                    : selectedTarget.ZoneName;
-
-                // PluginLog.Debug($"Target selected: {selectedTarget.Name} in {zoneName}.");
-                if (Service.Configuration.BraveEchoTarget)
-                    Service.ChatGui.Print($"[{this.Name}] Target selected: {selectedTarget.Name} in {zoneName}.");
-
-                var aetheryteId = this.GetNearestAetheryte(selectedTarget.Position);
-                if (aetheryteId == 0)
-                {
-                    if (index == 1)
-                    { // Dungeons
-                        // Service.ChatGui.Print($"[{this.Name}] Maybe someday this will queue you for a dungeon.");
-                        if (!this.ShowDutyFinder())
-                        {
-                            Service.ChatGui.Print($"[{this.Name}] Could not display the duty finder. Please report this to the developer.");
-                            return;
-                        }
-
-                        // TODO configure the duty finder.
-                    }
-                    else
-                    {
-                        PluginLog.Warning($"Could not find an aetheryte for {zoneName}");
-                        Service.ChatGui.Print($"[{this.Name}] Could not find an appropriate aetheryte. Please report this to the developer.");
-                    }
-                }
-                else
-                {
-                    Service.GameGui.OpenMapWithMapLink(selectedTarget.Position);
-                    Teleporter.Teleport(aetheryteId);
-                }
-            }
-            catch (Exception ex)
-            {
-                PluginLog.Error(ex, "Don't crash the game");
-            }
-        }
-
-        private uint GetNearestAetheryte(MapLinkPayload mapLink)
+        private static uint GetNearestAetheryte(MapLinkPayload mapLink)
         {
             var closestAetheryteID = 0u;
             var closestDistance = double.MaxValue;
@@ -177,8 +94,8 @@ namespace ZodiacBuddy
                 return (41.0f / c * ((scaledPos + 1024.0f) / 2048.0f)) + 1.0f;
             }
 
-            var aetherytes = Service.DataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.Aetheryte>()!;
-            var mapMarkers = Service.DataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.MapMarker>()!;
+            var aetherytes = Service.DataManager.GetExcelSheet<Sheets.Aetheryte>()!;
+            var mapMarkers = Service.DataManager.GetExcelSheet<Sheets.MapMarker>()!;
 
             foreach (var aetheryte in aetherytes)
             {
@@ -215,28 +132,133 @@ namespace ZodiacBuddy
             return closestAetheryteID;
         }
 
-        private unsafe bool ShowDutyFinder()
+        /// <summary>
+        /// Teleport to the given aetheryte.
+        /// </summary>
+        /// <param name="aetheryteID">Aetheryte ID.</param>
+        /// <returns>If the teleport was successful.</returns>
+        private unsafe bool Teleport(uint aetheryteID)
         {
-            var alreadyOpen = Service.GameGui.GetAddonByName("ContentsFinder", 1) != IntPtr.Zero;
-            if (alreadyOpen)
-                return true;
+            if (Service.ClientState.LocalPlayer == null)
+                return false;
 
-            var framework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance();
-            if (framework == null)
+            var telepo = Telepo.Instance();
+            if (telepo == null)
             {
-                PluginLog.Error("AgentLookup: Framework was null");
+                Service.ChatGui.PrintError("Something horrible happened, please contact the developer.");
+                PluginLog.Error("Could not teleport: Telepo is missing.");
                 return false;
             }
 
+            if (telepo->TeleportList.Size() == 0)
+                telepo->UpdateAetheryteList();
+
+            foreach (var aetheryte in telepo->TeleportList.Span)
+            {
+                if (aetheryte.AetheryteId == aetheryteID)
+                    return telepo->Teleport(aetheryteID, 0);
+            }
+
+            Service.ChatGui.PrintError("Could not teleport, not attuned.");
+            return false;
+        }
+
+        private unsafe bool ShowDutyFinder(uint cfcID)
+        {
+            if (cfcID == 0)
+                return false;
+
+            var framework = Framework.Instance();
             var uiModule = framework->GetUiModule();
-            if (uiModule == null)
-            {
-                PluginLog.Error("AgentLookup: UiModule was null");
-                return false;
-            }
+            var agentModule = uiModule->GetAgentModule();
+            var cfAgent = (IntPtr)agentModule->GetAgentByInternalId(AgentId.ContentsFinder);
 
-            uiModule->ExecuteMainCommand(0x21);
+            this.openDuty(cfAgent, cfcID, 0);
             return true;
+        }
+
+        private unsafe void ReceiveEventDetour(IntPtr addon, uint which, IntPtr eventData, IntPtr inputData)
+        {
+            try
+            {
+                this.ReceiveEvent(addon, eventData);
+            }
+            catch (Exception ex)
+            {
+                PluginLog.Error(ex, "Don't crash the game");
+            }
+        }
+
+        private unsafe void ReceiveEvent(IntPtr addon, IntPtr eventData)
+        {
+            var relicNote = RelicNote.Instance();
+            if (relicNote == null)
+                return;
+
+            var bookID = relicNote->RelicNoteID;
+
+            var addonPtr = (AddonRelicNoteBook*)addon;
+            var index = addonPtr->CategoryList->SelectedItemIndex;
+
+            var eventDataPtr = (EventData*)eventData;
+            var targetComponent = eventDataPtr->Target;
+
+            unsafe static bool IsOwnerNode(IntPtr target, AtkComponentCheckBox* checkbox) => target == new IntPtr(checkbox->AtkComponentButton.AtkComponentBase.OwnerNode);
+
+            var selectedTarget = targetComponent switch
+            {
+                // Enemies
+                IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy0.CheckBox) => Datastore.BraveBooks[bookID].Enemies[0],
+                IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy1.CheckBox) => Datastore.BraveBooks[bookID].Enemies[1],
+                IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy2.CheckBox) => Datastore.BraveBooks[bookID].Enemies[2],
+                IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy3.CheckBox) => Datastore.BraveBooks[bookID].Enemies[3],
+                IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy4.CheckBox) => Datastore.BraveBooks[bookID].Enemies[4],
+                IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy5.CheckBox) => Datastore.BraveBooks[bookID].Enemies[5],
+                IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy6.CheckBox) => Datastore.BraveBooks[bookID].Enemies[6],
+                IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy7.CheckBox) => Datastore.BraveBooks[bookID].Enemies[7],
+                IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy8.CheckBox) => Datastore.BraveBooks[bookID].Enemies[8],
+                IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy9.CheckBox) => Datastore.BraveBooks[bookID].Enemies[9],
+                // Dungeons
+                IntPtr t when index == 1 && IsOwnerNode(t, addonPtr->Dungeon0.CheckBox) => Datastore.BraveBooks[bookID].Dungeons[0],
+                IntPtr t when index == 1 && IsOwnerNode(t, addonPtr->Dungeon1.CheckBox) => Datastore.BraveBooks[bookID].Dungeons[1],
+                IntPtr t when index == 1 && IsOwnerNode(t, addonPtr->Dungeon2.CheckBox) => Datastore.BraveBooks[bookID].Dungeons[2],
+                // FATEs
+                IntPtr t when index == 2 && IsOwnerNode(t, addonPtr->Fate0.CheckBox) => Datastore.BraveBooks[bookID].Fates[0],
+                IntPtr t when index == 2 && IsOwnerNode(t, addonPtr->Fate1.CheckBox) => Datastore.BraveBooks[bookID].Fates[1],
+                IntPtr t when index == 2 && IsOwnerNode(t, addonPtr->Fate2.CheckBox) => Datastore.BraveBooks[bookID].Fates[2],
+                // Leves
+                IntPtr t when index == 3 && IsOwnerNode(t, addonPtr->Leve0.CheckBox) => Datastore.BraveBooks[bookID].Leves[0],
+                IntPtr t when index == 3 && IsOwnerNode(t, addonPtr->Leve1.CheckBox) => Datastore.BraveBooks[bookID].Leves[1],
+                IntPtr t when index == 3 && IsOwnerNode(t, addonPtr->Leve2.CheckBox) => Datastore.BraveBooks[bookID].Leves[2],
+                _ => throw new ArgumentException($"Unexpected index and/or node: {index}, {targetComponent:X}"),
+            };
+
+            var zoneName = !string.IsNullOrEmpty(selectedTarget.LocationName)
+                ? $"{selectedTarget.ZoneName}, {selectedTarget.LocationName}"
+                : selectedTarget.ZoneName;
+
+            // PluginLog.Debug($"Target selected: {selectedTarget.Name} in {zoneName}.");
+            if (Service.Configuration.BraveEchoTarget)
+                Service.ChatGui.Print($"[{this.Name}] Target selected: {selectedTarget.Name} in {zoneName}.");
+
+            var aetheryteId = GetNearestAetheryte(selectedTarget.Position);
+            if (aetheryteId == 0)
+            {
+                if (index == 1)
+                {
+                    // Dungeons
+                    this.ShowDutyFinder(selectedTarget.ContentsFinderConditionID);
+                }
+                else
+                {
+                    PluginLog.Warning($"Could not find an aetheryte for {zoneName}");
+                }
+            }
+            else
+            {
+                Service.GameGui.OpenMapWithMapLink(selectedTarget.Position);
+                this.Teleport(aetheryteId);
+            }
         }
 
         private void OnOpenConfigUi()
@@ -297,6 +319,11 @@ namespace ZodiacBuddy
             /// Gets the zone ID.
             /// </summary>
             public uint ZoneID { get; init; }
+
+            /// <summary>
+            /// Gets the contents finder condition ID.
+            /// </summary>
+            public uint ContentsFinderConditionID { get; init; }
 
             /// <summary>
             /// Gets the location name.

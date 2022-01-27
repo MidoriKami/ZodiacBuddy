@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -101,6 +101,8 @@ namespace ZodiacBuddy
 
                         var position = GetMonsterPosition(mntc.RowId);
 
+                        var cfcID = position.TerritoryType.ContentFinderCondition.Value!.RowId;
+
                         // PluginLog.Debug($"Loaded dungeon {mntcID}: {name}");
                         braveBook.Dungeons[i] = new BraveTarget()
                         {
@@ -109,6 +111,7 @@ namespace ZodiacBuddy
                             ZoneID = zoneID,
                             LocationName = locationName,
                             Position = position,
+                            ContentsFinderConditionID = cfcID,
                         };
                     }
 
@@ -143,7 +146,7 @@ namespace ZodiacBuddy
                         var leveName = leve.Name.ToString();
                         var leveClient = leve.LeveClient.Value!.Name.ToString();
 
-                        var position = GetLevelPosition(leveID);
+                        var position = GetLevePosition(leveID);
 
                         var zoneName = position.TerritoryType.PlaceName.Value!.Name.ToString();
                         var zoneID = position.TerritoryType.RowId;
@@ -326,7 +329,7 @@ namespace ZodiacBuddy
             };
         }
 
-        private static MapLinkPayload GetLevelPosition(uint leveID)
+        private static MapLinkPayload GetLevePosition(uint leveID)
         {
             return leveID switch
             {
