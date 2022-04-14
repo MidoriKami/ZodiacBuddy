@@ -132,11 +132,6 @@ namespace ZodiacBuddy
             return closestAetheryteID;
         }
 
-        /// <summary>
-        /// Teleport to the given aetheryte.
-        /// </summary>
-        /// <param name="aetheryteID">Aetheryte ID.</param>
-        /// <returns>If the teleport was successful.</returns>
         private unsafe bool Teleport(uint aetheryteID)
         {
             if (Service.ClientState.LocalPlayer == null)
