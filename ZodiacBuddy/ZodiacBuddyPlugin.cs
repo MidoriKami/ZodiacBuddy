@@ -8,6 +8,7 @@ using Dalamud.Hooking;
 using Dalamud.Interface.Windowing;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -27,8 +28,12 @@ namespace ZodiacBuddy
 
         private readonly WindowSystem windowSystem;
         private readonly ConfigWindow configWindow;
-        private readonly Hook<ReceiveEventDelegate> receiveEventHook;
-        private readonly OpenDutyDelegate openDuty;
+
+        [Signature("48 89 74 24 ?? 57 48 83 EC 20 8D 42 FD 49 8B F0 48 8B F9 83 F8 09 77 2D", DetourName = nameof(ReceiveEventDetour))]
+        private readonly Hook<ReceiveEventDelegate> receiveEventHook = null!;
+
+        [Signature("48 89 6C 24 ?? 48 89 74 24 ?? 57 48 81 EC ?? ?? ?? ?? 48 8B F9 41 0F B6 E8")]
+        private readonly OpenDutyDelegate openDuty = null!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ZodiacBuddyPlugin"/> class.
@@ -41,8 +46,9 @@ namespace ZodiacBuddy
             FFXIVClientStructs.Resolver.Initialize();
 
             Service.Configuration = pluginInterface.GetPluginConfig() as PluginConfiguration ?? new PluginConfiguration();
-            Service.Address = new PluginAddressResolver();
-            Service.Address.Setup();
+
+            SignatureHelper.Initialise(this);
+            this.receiveEventHook.Enable();
 
             this.configWindow = new();
             this.windowSystem = new("ZodiacBuddy");
@@ -56,11 +62,6 @@ namespace ZodiacBuddy
                 HelpMessage = "Open a window to edit various settings.",
                 ShowInHelp = true,
             });
-
-            this.openDuty = Marshal.GetDelegateForFunctionPointer<OpenDutyDelegate>(Service.Address.AgentContentsFinderOpenRegularDutyAddress);
-
-            this.receiveEventHook = new Hook<ReceiveEventDelegate>(Service.Address.AddonRelicNoteBookReceiveEventAddress, this.ReceiveEventDetour);
-            this.receiveEventHook.Enable();
         }
 
         private delegate void ReceiveEventDelegate(IntPtr addon, uint which, IntPtr eventData, IntPtr inputData);

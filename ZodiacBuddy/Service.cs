@@ -22,11 +22,6 @@ namespace ZodiacBuddy
         internal static PluginConfiguration Configuration { get; set; } = null!;
 
         /// <summary>
-        /// Gets or sets the plugin address resolver.
-        /// </summary>
-        internal static PluginAddressResolver Address { get; set; } = null!;
-
-        /// <summary>
         /// Gets the Dalamud plugin interface.
         /// </summary>
         [PluginService]
