@@ -1,5 +1,7 @@
+using System;
 using System.Numerics;
 
+using Dalamud.Game.Text;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 
@@ -31,6 +33,21 @@ namespace ZodiacBuddy
             if (ImGui.Checkbox("Echo Brave target selection to chat", ref braveEcho))
             {
                 Service.Configuration.BraveEchoTarget = braveEcho;
+                Service.Configuration.Save();
+            }
+
+            var names = Enum.GetNames<XivChatType>();
+            var channels = Enum.GetValues<XivChatType>();
+            var current = Array.IndexOf(channels, Service.Configuration.BraveEchoChannel);
+            if (current == -1)
+            {
+                current = Array.IndexOf(channels, Service.Configuration.BraveEchoChannel = XivChatType.Echo);
+                Service.Configuration.Save();
+            }
+
+            if (ImGui.Combo("Channel", ref current, names, names.Length))
+            {
+                Service.Configuration.BraveEchoChannel = channels[current];
                 Service.Configuration.Save();
             }
         }

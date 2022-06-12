@@ -3,6 +3,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 
 using Dalamud.Game.Command;
+using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Hooking;
 using Dalamud.Interface.Windowing;
@@ -235,7 +236,13 @@ namespace ZodiacBuddy
 
             // PluginLog.Debug($"Target selected: {selectedTarget.Name} in {zoneName}.");
             if (Service.Configuration.BraveEchoTarget)
-                Service.ChatGui.Print($"[{this.Name}] Target selected: {selectedTarget.Name} in {zoneName}.");
+            {
+                Service.ChatGui.PrintChat(new XivChatEntry()
+                {
+                    Type = Service.Configuration.BraveEchoChannel,
+                    Message = $"[{this.Name}] Target selected: {selectedTarget.Name} in {zoneName}.",
+                });
+            }
 
             var aetheryteId = GetNearestAetheryte(selectedTarget.Position);
             if (aetheryteId == 0)

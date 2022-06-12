@@ -1,6 +1,7 @@
 using System;
 
 using Dalamud.Configuration;
+using Dalamud.Game.Text;
 
 namespace ZodiacBuddy
 {
@@ -19,6 +20,11 @@ namespace ZodiacBuddy
         /// Gets or sets a value indicating whether to echo the target before teleporting to a Brave target.
         /// </summary>
         public bool BraveEchoTarget { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets the channel that receives target information.
+        /// </summary>
+        public XivChatType BraveEchoChannel { get; set; } = XivChatType.Echo;
 
         /// <summary>
         /// Save the configuration to disk.
