@@ -15,6 +15,7 @@ using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using ZodiacBuddy.Novus;
 
 using Sheets = Lumina.Excel.GeneratedSheets;
 
@@ -29,6 +30,7 @@ namespace ZodiacBuddy
 
         private readonly WindowSystem windowSystem;
         private readonly ConfigWindow configWindow;
+        private readonly NovusManager novusManager;
 
         [Signature("48 89 74 24 ?? 57 48 83 EC 20 8D 42 FD 49 8B F0 48 8B F9 83 F8 09 77 2D", DetourName = nameof(ReceiveEventDetour))]
         private readonly Hook<ReceiveEventDelegate> receiveEventHook = null!;
@@ -63,6 +65,8 @@ namespace ZodiacBuddy
                 HelpMessage = "Open a window to edit various settings.",
                 ShowInHelp = true,
             });
+
+            this.novusManager = new NovusManager();
         }
 
         private delegate void ReceiveEventDelegate(IntPtr addon, uint which, IntPtr eventData, IntPtr inputData);
@@ -81,6 +85,7 @@ namespace ZodiacBuddy
 
             Service.Interface.UiBuilder.Draw -= this.windowSystem.Draw;
             Service.Interface.UiBuilder.OpenConfigUi -= this.OnOpenConfigUi;
+            this.novusManager?.Dispose();
         }
 
         private static uint GetNearestAetheryte(MapLinkPayload mapLink)

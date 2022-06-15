@@ -50,6 +50,59 @@ namespace ZodiacBuddy
                 Service.Configuration.BraveEchoChannel = channels[current];
                 Service.Configuration.Save();
             }
+
+            DrawNovus();
+        }
+
+        private static void DrawNovus()
+        {
+            if (!ImGui.CollapsingHeader("Novus relic")) return;
+
+            var display = Service.Configuration.NovusConfiguration.DisplayNovusInfo;
+            if (ImGui.Checkbox("Display Novus weapon information", ref display))
+            {
+                Service.Configuration.NovusConfiguration.DisplayNovusInfo = display;
+                Service.Configuration.Save();
+            }
+
+            var displayBonusDuty = Service.Configuration.NovusConfiguration.DisplayBonusDuty;
+            if (ImGui.Checkbox("Display duty with the bonus of light", ref displayBonusDuty))
+            {
+                Service.Configuration.NovusConfiguration.DisplayBonusDuty = displayBonusDuty;
+                Service.Configuration.Save();
+            }
+
+            var playSound = Service.Configuration.NovusConfiguration.PlaySoundOnLightBonusNotification;
+            if (ImGui.Checkbox("Play sound when notifying about light bonus", ref playSound))
+            {
+                Service.Configuration.NovusConfiguration.PlaySoundOnLightBonusNotification = playSound;
+                Service.Configuration.Save();
+            }
+
+            var dontPlayRelicGlassAnimation = Service.Configuration.NovusConfiguration.DontPlayRelicGlassAnimation;
+            if (ImGui.Checkbox(
+                    "Skip text animation from the relic glass (Kind of)",
+                    ref dontPlayRelicGlassAnimation))
+            {
+                Service.Configuration.NovusConfiguration.DontPlayRelicGlassAnimation = dontPlayRelicGlassAnimation;
+                Service.Configuration.Save();
+            }
+
+            if (ImGui.CollapsingHeader("Light progress color"))
+            {
+                var vector = ImGui.ColorConvertU32ToFloat4(Service.Configuration.NovusConfiguration.ProgressColor);
+                if (ImGui.ColorPicker4("##LightProgressColor", ref vector, ImGuiColorEditFlags.None))
+                {
+                    Service.Configuration.NovusConfiguration.ProgressColor = ImGui.ColorConvertFloat4ToU32(vector);
+                    Service.Configuration.Save();
+                }
+
+                if (ImGui.Button("Reset color"))
+                {
+                    Service.Configuration.NovusConfiguration.ResetProgressColor();
+                    Service.Configuration.Save();
+                }
+            }
         }
     }
 }

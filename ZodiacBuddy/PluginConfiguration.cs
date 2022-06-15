@@ -2,6 +2,7 @@ using System;
 
 using Dalamud.Configuration;
 using Dalamud.Game.Text;
+using ZodiacBuddy.Novus;
 
 namespace ZodiacBuddy
 {
@@ -25,6 +26,11 @@ namespace ZodiacBuddy
         /// Gets or sets the channel that receives target information.
         /// </summary>
         public XivChatType BraveEchoChannel { get; set; } = XivChatType.Echo;
+
+        /// <summary>
+        /// Gets configuration for Novus relic.
+        /// </summary>
+        public NovusConfiguration NovusConfiguration { get; } = new();
 
         /// <summary>
         /// Save the configuration to disk.
