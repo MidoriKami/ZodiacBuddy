@@ -18,6 +18,11 @@ namespace ZodiacBuddy
     internal class Service
     {
         /// <summary>
+        /// Gets or sets the plugin.
+        /// </summary>
+        internal static ZodiacBuddyPlugin Plugin { get; set; } = null!;
+
+        /// <summary>
         /// Gets or sets the plugin configuration.
         /// </summary>
         internal static PluginConfiguration Configuration { get; set; } = null!;
@@ -57,6 +62,12 @@ namespace ZodiacBuddy
         /// </summary>
         [PluginService]
         internal static DataManager DataManager { get; private set; } = null!;
+
+        /// <summary>
+        /// Gets the Dalamud framework manager.
+        /// </summary>
+        [PluginService]
+        internal static Framework Framework { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud game gui.

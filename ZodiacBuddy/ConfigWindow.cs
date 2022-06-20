@@ -27,39 +27,55 @@ namespace ZodiacBuddy
         /// <inheritdoc/>
         public override void Draw()
         {
-            ImGui.TextWrapped("Currently the only implemented feature is teleporting to your target when clicking on pictures in the Trial of the Braves books.\n\nEnjoy!\n");
+            if (ImGui.CollapsingHeader("General"))
+                this.DrawGeneral();
+
+            if (ImGui.CollapsingHeader("Atma"))
+                this.DrawAtma();
+
+            if (ImGui.CollapsingHeader("Novus"))
+                this.DrawNovus();
+        }
+
+        private void DrawGeneral()
+        {
+            var names = Enum.GetNames<XivChatType>();
+            var channels = Enum.GetValues<XivChatType>();
+            var current = Array.IndexOf(channels, Service.Configuration.ChatType);
+            if (current == -1)
+            {
+                current = Array.IndexOf(channels, Service.Configuration.ChatType = XivChatType.Echo);
+                Service.Configuration.Save();
+            }
+
+            ImGui.SetNextItemWidth(200f);
+            if (ImGui.Combo("Chat channel", ref current, names, names.Length))
+            {
+                Service.Configuration.ChatType = channels[current];
+                Service.Configuration.Save();
+            }
+
+            ImGui.NewLine();
+        }
+
+        private void DrawAtma()
+        {
+            ImGui.Text("Pro tip: Use the Sonar plugin to track Fate uptime across your entire datacenter.\n");
 
             var braveEcho = Service.Configuration.BraveEchoTarget;
-            if (ImGui.Checkbox("Echo Brave target selection to chat", ref braveEcho))
+            if (ImGui.Checkbox("Display target selection in chat", ref braveEcho))
             {
                 Service.Configuration.BraveEchoTarget = braveEcho;
                 Service.Configuration.Save();
             }
 
-            var names = Enum.GetNames<XivChatType>();
-            var channels = Enum.GetValues<XivChatType>();
-            var current = Array.IndexOf(channels, Service.Configuration.BraveEchoChannel);
-            if (current == -1)
-            {
-                current = Array.IndexOf(channels, Service.Configuration.BraveEchoChannel = XivChatType.Echo);
-                Service.Configuration.Save();
-            }
-
-            if (ImGui.Combo("Channel", ref current, names, names.Length))
-            {
-                Service.Configuration.BraveEchoChannel = channels[current];
-                Service.Configuration.Save();
-            }
-
-            DrawNovus();
+            ImGui.NewLine();
         }
 
-        private static void DrawNovus()
+        private void DrawNovus()
         {
-            if (!ImGui.CollapsingHeader("Novus relic")) return;
-
             var display = Service.Configuration.NovusConfiguration.DisplayNovusInfo;
-            if (ImGui.Checkbox("Display Novus weapon information", ref display))
+            if (ImGui.Checkbox("Display Novus weapon information when equipped", ref display))
             {
                 Service.Configuration.NovusConfiguration.DisplayNovusInfo = display;
                 Service.Configuration.Save();
@@ -80,29 +96,35 @@ namespace ZodiacBuddy
             }
 
             var dontPlayRelicGlassAnimation = Service.Configuration.NovusConfiguration.DontPlayRelicGlassAnimation;
-            if (ImGui.Checkbox(
-                    "Skip text animation from the relic glass (Kind of)",
-                    ref dontPlayRelicGlassAnimation))
+            if (ImGui.Checkbox("Skip text animation from the relic glass", ref dontPlayRelicGlassAnimation))
             {
                 Service.Configuration.NovusConfiguration.DontPlayRelicGlassAnimation = dontPlayRelicGlassAnimation;
                 Service.Configuration.Save();
             }
 
-            if (ImGui.CollapsingHeader("Light progress color"))
+            var showNumbersInRelicGlass = Service.Configuration.NovusConfiguration.ShowNumbersInRelicGlass;
+            if (ImGui.Checkbox("Show light numbers in the relic glass", ref showNumbersInRelicGlass))
             {
-                var vector = ImGui.ColorConvertU32ToFloat4(Service.Configuration.NovusConfiguration.ProgressColor);
-                if (ImGui.ColorPicker4("##LightProgressColor", ref vector, ImGuiColorEditFlags.None))
-                {
-                    Service.Configuration.NovusConfiguration.ProgressColor = ImGui.ColorConvertFloat4ToU32(vector);
-                    Service.Configuration.Save();
-                }
-
-                if (ImGui.Button("Reset color"))
-                {
-                    Service.Configuration.NovusConfiguration.ResetProgressColor();
-                    Service.Configuration.Save();
-                }
+                Service.Configuration.NovusConfiguration.ShowNumbersInRelicGlass = showNumbersInRelicGlass;
+                Service.Configuration.Save();
             }
+
+            ImGui.PushItemWidth(150f);
+            var progressColor = ImGui.ColorConvertU32ToFloat4(Service.Configuration.NovusConfiguration.ProgressColor);
+            if (ImGui.ColorEdit4("Light progress color", ref progressColor, ImGuiColorEditFlags.DisplayHex | ImGuiColorEditFlags.PickerHueWheel))
+            {
+                Service.Configuration.NovusConfiguration.ProgressColor = ImGui.ColorConvertFloat4ToU32(progressColor);
+                Service.Configuration.Save();
+            }
+
+            ImGui.SameLine();
+            if (ImGui.Button("Reset"))
+            {
+                Service.Configuration.NovusConfiguration.ResetProgressColor();
+                Service.Configuration.Save();
+            }
+
+            ImGui.NewLine();
         }
     }
 }
