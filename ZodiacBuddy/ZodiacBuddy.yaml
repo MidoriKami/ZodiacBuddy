@@ -1,0 +1,10 @@
+author: daemitus
+name: ZodiacBuddy
+punch_line: Complete your Zodiac relic with style.
+description: This plugin attempts to help you complete your Zodiac weapon in various ways.
+repo_url: https://github.com/daemitus/ZodiacBuddy
+icon_url: https://raw.githubusercontent.com/daemitus/ZodiacBuddy/master/res/icon.png
+image_urls: []
+changelog: |
+  2022-06-22
+  Added a Novus light tracker (by Hiroa)

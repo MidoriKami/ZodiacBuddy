@@ -6,6 +6,7 @@ using Dalamud.Game.ClientState.JobGauge;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
+using Dalamud.Game.Gui.Toast;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 
@@ -16,6 +17,11 @@ namespace ZodiacBuddy
     /// </summary>
     internal class Service
     {
+        /// <summary>
+        /// Gets or sets the plugin.
+        /// </summary>
+        internal static ZodiacBuddyPlugin Plugin { get; set; } = null!;
+
         /// <summary>
         /// Gets or sets the plugin configuration.
         /// </summary>
@@ -58,6 +64,12 @@ namespace ZodiacBuddy
         internal static DataManager DataManager { get; private set; } = null!;
 
         /// <summary>
+        /// Gets the Dalamud framework manager.
+        /// </summary>
+        [PluginService]
+        internal static Framework Framework { get; private set; } = null!;
+
+        /// <summary>
         /// Gets the Dalamud game gui.
         /// </summary>
         [PluginService]
@@ -74,5 +86,11 @@ namespace ZodiacBuddy
         /// </summary>
         [PluginService]
         internal static TargetManager TargetManager { get; private set; } = null!;
+
+        /// <summary>
+        /// Gets the Dalamud toast manager.
+        /// </summary>
+        [PluginService]
+        internal static ToastGui Toasts { get; private set; } = null!;
     }
 }
