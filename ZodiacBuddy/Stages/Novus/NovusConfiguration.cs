@@ -44,6 +44,11 @@ public class NovusConfiguration
     public bool ShowNumbersInRelicGlass { get; set; } = true;
 
     /// <summary>
+    /// Gets or sets a value indicating whether to notify the user of new duty with bonus light when the relic is not equipped.
+    /// </summary>
+    public bool NotifyLightBonusOnlyWhenEquipped { get; set; } = true;
+
+    /// <summary>
     /// Gets or sets a value indicating whether to not display the first message on the RelicGlass addon.
     /// </summary>
     public bool DontPlayRelicGlassAnimation { get; set; } = true;

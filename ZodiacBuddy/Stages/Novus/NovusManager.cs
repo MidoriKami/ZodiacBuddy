@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
 
+using Dalamud.Game;
 using Dalamud.Game.Gui.Toast;
-using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Hooking;
 using Dalamud.Logging;
@@ -10,6 +10,7 @@ using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using ZodiacBuddy.Novus.Data;
+using ZodiacBuddy.Stages.Novus;
 
 namespace ZodiacBuddy.Novus;
 
@@ -21,11 +22,9 @@ internal class NovusManager : IDisposable
     [Signature("40 56 48 83 EC 50 F3 0F 10 05", DetourName = nameof(AddonRelicGlassOnSetupDetour))]
     private readonly Hook<AddonRelicGlassOnSetupDelegate> addonRelicGlassOnSetupHook = null!;
 
-    [Signature("E8 ?? ?? ?? ?? 4D 39 BE")]
-    private readonly AlertFuncDelegate playSound = null!;
-
     private readonly NovusWindow novusWindow;
     private readonly Timer timer;
+    private readonly NovusHttpClient client;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NovusManager"/> class.
@@ -38,15 +37,14 @@ internal class NovusManager : IDisposable
         Service.Toasts.QuestToast += this.OnToast;
         Service.Interface.UiBuilder.Draw += this.novusWindow.Draw;
 
-        this.timer = new Timer(_ => this.ResetBonus(), null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
+        this.client = new NovusHttpClient();
+        this.timer = new Timer(_ => this.CheckBonus(), null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
 
         SignatureHelper.Initialise(this);
         this.addonRelicGlassOnSetupHook?.Enable();
     }
 
     private delegate void AddonRelicGlassOnSetupDelegate(IntPtr addon, uint a2, IntPtr relicInfoPtr);
-
-    private delegate ulong AlertFuncDelegate(byte id, ulong unk1, ulong unk2);
 
     private static NovusConfiguration Configuration => Service.Configuration.NovusConfiguration;
 
@@ -70,6 +68,39 @@ internal class NovusManager : IDisposable
             throw new Exception($"InventorySlot{index} was null");
 
         return *slot;
+    }
+
+    /// <summary>
+    /// Update the bonus of light in configuration and notify the player.
+    /// </summary>
+    /// <param name="territoryId">Territory id of the bonus.</param>
+    /// <param name="date">DateTime of detection.</param>
+    /// <param name="message">Message to notify the player. Can be null to not send notification.</param>
+    public static void UpdateLightBonus(uint? territoryId, DateTime? date, string? message)
+    {
+        Configuration.LightBonusTerritoryId = territoryId;
+        Configuration.LightBonusDetection = date;
+        Service.Configuration.Save();
+
+        if (message == null)
+            return;
+
+        if (Configuration.NotifyLightBonusOnlyWhenEquipped)
+        {
+            var mainhand = GetEquippedItem(0);
+            var offhand = GetEquippedItem(1);
+
+            if (!NovusRelic.Novus.ContainsKey(mainhand.ItemID) &&
+                !NovusRelic.Novus.ContainsKey(offhand.ItemID))
+                return;
+        }
+
+        Service.Plugin.PrintMessage(message);
+
+        if (!Configuration.PlaySoundOnLightBonusNotification)
+            return;
+
+        Service.Sound.PlaySound(Sound.Sounds.Sound09);
     }
 
     /// <inheritdoc/>
@@ -129,7 +160,7 @@ internal class NovusManager : IDisposable
         analyseText->SetText(lightText->NodeText.ToString());
     }
 
-    private void OnUpdate(Dalamud.Game.Framework framework)
+    private void OnUpdate(Framework framework)
     {
         if (!Configuration.DisplayNovusInfo)
         {
@@ -176,47 +207,35 @@ internal class NovusManager : IDisposable
                 if (lightLevel.Intensity <= territoryLight!.DefaultLightIntensity)
                 {
                     // No longer light bonus
-                    this.UpdateLightBonus(null, null, $"\"{territoryLight.DutyName}\" no longer has the bonus of light.");
+                    UpdateLightBonus(null, null, $"\"{territoryLight.DutyName}\" no longer has the bonus of light.");
                 }
                 else
                 {
                     // Update dateTime
-                    this.UpdateLightBonus(territoryRowId, DateTime.UtcNow, null);
+                    UpdateLightBonus(territoryRowId, DateTime.UtcNow, null);
                 }
             }
             else if (lightLevel.Intensity > territoryLight!.DefaultLightIntensity)
             {
                 // New detection
-                this.UpdateLightBonus(territoryRowId, DateTime.UtcNow, $"Light bonus detected on \"{territoryLight.DutyName}\"");
+                UpdateLightBonus(territoryRowId, DateTime.UtcNow, $"Light bonus detected on \"{territoryLight.DutyName}\"");
+                this.client.SendReport(territoryRowId);
             }
         }
     }
 
-    private void UpdateLightBonus(uint? territoryId, DateTime? date, string? message)
-    {
-        Configuration.LightBonusTerritoryId = territoryId;
-        Configuration.LightBonusDetection = date;
-        Service.Configuration.Save();
-
-        if (message == null)
-            return;
-
-        Service.Plugin.PrintMessage(message);
-
-        if (!Configuration.PlaySoundOnLightBonusNotification)
-            return;
-
-        this.playSound(0x2D, 0u, 0u);
-    }
-
-    private void ResetBonus()
+    private void CheckBonus()
     {
         // Reset bonus after 2h
         var dt = DateTime.UtcNow.Subtract(TimeSpan.FromHours(2));
         if (Configuration.LightBonusDetection != null &&
             Configuration.LightBonusDetection.Value < dt)
         {
-            this.UpdateLightBonus(null, null, null);
+            UpdateLightBonus(null, null, null);
+        }
+        else if (Configuration.LightBonusDetection == null)
+        {
+            this.client.RetrieveLastReport();
         }
     }
 }
