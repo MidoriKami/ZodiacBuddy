@@ -21,7 +21,7 @@ namespace ZodiacBuddy.Stages.Novus
     /// </summary>
     internal class NovusHttpClient : IDisposable
     {
-        private const string BaseUri = "https://sparkling-glade-8937.fly.dev";
+        private const string BaseUri = "https://zodiac-buddy-db.fly.dev";
         private readonly JwtEncoder encoder = new(new HMACSHA512Algorithm(), new JsonNetSerializer(), new JwtBase64UrlEncoder());
         private readonly HttpClient httpClient;
         private readonly ClientState clientState;
@@ -80,28 +80,32 @@ namespace ZodiacBuddy.Stages.Novus
             this.Send(request, null);
         }
 
-        private void Send(HttpRequestMessage request, Action<HttpResponseMessage>? callback)
+        private void Send(HttpRequestMessage request, Action<string>? successCallback)
         {
-            Task.Run(() =>
+            Task.Run(async () =>
             {
                 var response = this.httpClient.Send(request);
-                callback?.Invoke(response);
+                var content = await response.Content.ReadAsStringAsync();
+                PluginLog.Verbose($"{request.RequestUri} => [{response.StatusCode}] {content}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    PluginLog.Warning($"{request.RequestUri} => [{response.StatusCode}] {content}");
+                    return;
+                }
+
+                successCallback?.Invoke(content);
             });
         }
 
-        private async void OnLastReportResponse(HttpResponseMessage response)
+        private void OnLastReportResponse(string content)
         {
-            var content = await response.Content.ReadAsStringAsync();
-            PluginLog.Debug($"{response.StatusCode} => {content}");
-            if (!response.IsSuccessStatusCode)
-                return;
-
             var report = JsonConvert.DeserializeObject<Report>(content);
             var dt = DateTime.UtcNow.Subtract(TimeSpan.FromHours(2));
-            if (report.Date >= dt && NovusDuty.TryGetValue(report.Territory, out var territoryLight))
+            if (report.Date >= dt && NovusDuty.TryGetValue(report.TerritoryId, out var territoryLight))
             {
                 var message = $"Light bonus detected on \"{territoryLight?.DutyName}\"";
-                NovusManager.UpdateLightBonus(report.Territory, report.Date, message);
+                NovusManager.UpdateLightBonus(report.TerritoryId, report.Date, message);
             }
         }
 
@@ -109,9 +113,9 @@ namespace ZodiacBuddy.Stages.Novus
         {
             var payload = new Dictionary<string, object>
             {
-                { "cid", this.clientState.LocalContentId },
-                { "aud", "ZBuddy" },
-                { "iss", "ZBuddyDB" },
+                { "sub", this.clientState.LocalContentId },
+                { "aud", "ZodiacBuddy" },
+                { "iss", "ZodiacBuddyDB" },
                 { "iat", DateTimeOffset.UtcNow.ToUnixTimeSeconds() },
             };
             return this.encoder.Encode(payload, Secrets.JwtSecret);

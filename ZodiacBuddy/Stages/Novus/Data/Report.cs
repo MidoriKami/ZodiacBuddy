@@ -1,5 +1,7 @@
 ﻿using System;
 
+using Newtonsoft.Json;
+
 namespace ZodiacBuddy.Stages.Novus.Data
 {
     /// <summary>
@@ -10,36 +12,40 @@ namespace ZodiacBuddy.Stages.Novus.Data
         /// <summary>
         /// Initializes a new instance of the <see cref="Report"/> struct.
         /// </summary>
-        /// <param name="datacenter">Datacenter id.</param>
-        /// <param name="world">World id.</param>
-        /// <param name="territory">Territory id.</param>
+        /// <param name="datacenterId">Datacenter id.</param>
+        /// <param name="worldId">World id.</param>
+        /// <param name="territoryId">Territory id.</param>
         /// <param name="date">Date of the report.</param>
-        public Report(uint datacenter, uint world, uint territory, DateTime date)
+        public Report(uint datacenterId, uint worldId, uint territoryId, DateTime date)
         {
-            this.Datacenter = datacenter;
-            this.World = world;
-            this.Territory = territory;
+            this.DatacenterId = datacenterId;
+            this.WorldId = worldId;
+            this.TerritoryId = territoryId;
             this.Date = date;
         }
 
         /// <summary>
-        /// Gets Datacenter id.
+        /// Gets or sets datacenter id.
         /// </summary>
-        public uint Datacenter { get; }
+        [JsonProperty("datacenter_id")]
+        public uint DatacenterId { get; set; }
 
         /// <summary>
-        /// Gets World id.
+        /// Gets or sets world id.
         /// </summary>
-        public uint World { get; }
+        [JsonProperty("world_id")]
+        public uint WorldId { get; set; }
 
         /// <summary>
-        /// Gets territory id.
+        /// Gets or sets territory id.
         /// </summary>
-        public uint Territory { get; }
+        [JsonProperty("territory_id")]
+        public uint TerritoryId { get; set; }
 
         /// <summary>
-        /// Gets report date.
+        /// Gets or sets report date.
         /// </summary>
-        public DateTime Date { get; }
+        [JsonProperty("date")]
+        public DateTime Date { get; set; }
     }
 }
