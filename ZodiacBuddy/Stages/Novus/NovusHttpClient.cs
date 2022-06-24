@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
 using Dalamud.Game.ClientState;
 using Dalamud.Logging;
+using JWT;
+using JWT.Algorithms;
+using JWT.Serializers;
 using Newtonsoft.Json;
 using ZodiacBuddy.Novus;
 using ZodiacBuddy.Novus.Data;
@@ -18,6 +22,7 @@ namespace ZodiacBuddy.Stages.Novus
     internal class NovusHttpClient : IDisposable
     {
         private const string BaseUri = "https://sparkling-glade-8937.fly.dev";
+        private readonly JwtEncoder encoder = new(new HMACSHA512Algorithm(), new JsonNetSerializer(), new JwtBase64UrlEncoder());
         private readonly HttpClient httpClient;
         private readonly ClientState clientState;
 
@@ -69,6 +74,7 @@ namespace ZodiacBuddy.Stages.Novus
             var content = JsonConvert.SerializeObject(report);
 
             var request = new HttpRequestMessage(HttpMethod.Post, $"{BaseUri}/reports/");
+            request.Headers.Add("x-access-token", this.GenerateJWT());
             request.Content = new StringContent(content, Encoding.UTF8, "application/json");
 
             this.Send(request, null);
@@ -97,6 +103,18 @@ namespace ZodiacBuddy.Stages.Novus
                 var message = $"Light bonus detected on \"{territoryLight?.DutyName}\"";
                 NovusManager.UpdateLightBonus(report.Territory, report.Date, message);
             }
+        }
+
+        private string GenerateJWT()
+        {
+            var payload = new Dictionary<string, object>
+            {
+                { "cid", this.clientState.LocalContentId },
+                { "aud", "ZBuddy" },
+                { "iss", "ZBuddyDB" },
+                { "iat", DateTimeOffset.UtcNow.ToUnixTimeSeconds() },
+            };
+            return this.encoder.Encode(payload, Secrets.JwtSecret);
         }
     }
 }
