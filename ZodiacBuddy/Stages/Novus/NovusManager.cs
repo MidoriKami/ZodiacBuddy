@@ -23,7 +23,8 @@ internal class NovusManager : IDisposable
     private readonly Hook<AddonRelicGlassOnSetupDelegate> addonRelicGlassOnSetupHook = null!;
 
     private readonly NovusWindow novusWindow;
-    private readonly Timer timer;
+    private readonly Timer resetTimer;
+    private readonly Timer checkTimer;
     private readonly NovusHttpClient client;
 
     /// <summary>
@@ -38,7 +39,15 @@ internal class NovusManager : IDisposable
         Service.Interface.UiBuilder.Draw += this.novusWindow.Draw;
 
         this.client = new NovusHttpClient();
-        this.timer = new Timer(_ => this.CheckBonus(), null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
+
+        var timeOfDay = DateTime.UtcNow.TimeOfDay;
+        var nextEvenHour = timeOfDay.Hours % 2 == 0 ?
+            TimeSpan.FromHours(timeOfDay.Hours + 2) :
+            TimeSpan.FromHours(timeOfDay.Hours + 1);
+        var delta = nextEvenHour - timeOfDay;
+
+        this.resetTimer = new Timer(_ => this.ResetBonus(), null, delta, TimeSpan.FromHours(2));
+        this.checkTimer = new Timer(_ => this.CheckBonus(), null, TimeSpan.FromSeconds(2), TimeSpan.FromMinutes(5));
 
         SignatureHelper.Initialise(this);
         this.addonRelicGlassOnSetupHook?.Enable();
@@ -85,15 +94,8 @@ internal class NovusManager : IDisposable
         if (message == null)
             return;
 
-        if (Configuration.NotifyLightBonusOnlyWhenEquipped)
-        {
-            var mainhand = GetEquippedItem(0);
-            var offhand = GetEquippedItem(1);
-
-            if (!NovusRelic.Novus.ContainsKey(mainhand.ItemID) &&
-                !NovusRelic.Novus.ContainsKey(offhand.ItemID))
-                return;
-        }
+        if (Configuration.NotifyLightBonusOnlyWhenEquipped && !HasNovusEquipped())
+            return;
 
         Service.Plugin.PrintMessage(message);
 
@@ -106,12 +108,22 @@ internal class NovusManager : IDisposable
     /// <inheritdoc/>
     public void Dispose()
     {
-        this.timer?.Dispose();
+        this.resetTimer?.Dispose();
+        this.checkTimer?.Dispose();
 
         Service.Interface.UiBuilder.Draw -= this.novusWindow.Draw;
         Service.Toasts.QuestToast -= this.OnToast;
 
         this.addonRelicGlassOnSetupHook?.Disable();
+    }
+
+    private static bool HasNovusEquipped()
+    {
+        var mainhand = GetEquippedItem(0);
+        var offhand = GetEquippedItem(1);
+
+        return NovusRelic.Novus.ContainsKey(mainhand.ItemID) ||
+               NovusRelic.Novus.ContainsKey(offhand.ItemID);
     }
 
     private void AddonRelicGlassOnSetupDetour(IntPtr addonRelicGlass, uint a2, IntPtr relicInfoPtr)
@@ -226,16 +238,14 @@ internal class NovusManager : IDisposable
 
     private void CheckBonus()
     {
-        // Reset bonus after 2h
-        var dt = DateTime.UtcNow.Subtract(TimeSpan.FromHours(2));
-        if (Configuration.LightBonusDetection != null &&
-            Configuration.LightBonusDetection.Value < dt)
-        {
-            UpdateLightBonus(null, null, null);
-        }
-        else if (Configuration.LightBonusDetection == null)
+        if (Configuration.LightBonusDetection == null)
         {
             this.client.RetrieveLastReport();
         }
+    }
+
+    private void ResetBonus()
+    {
+        UpdateLightBonus(null, null, null);
     }
 }

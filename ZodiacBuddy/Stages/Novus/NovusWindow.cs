@@ -1,5 +1,4 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
 
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
@@ -84,11 +83,8 @@ public class NovusWindow
         if (!Configuration.DisplayBonusDuty)
             return;
 
-        // Don't display bonus light detected 2h ago
-        var dt = DateTime.UtcNow.Subtract(TimeSpan.FromHours(2));
         if (Configuration.LightBonusDetection != null &&
-            Configuration.LightBonusTerritoryId != null &&
-            Configuration.LightBonusDetection.Value > dt)
+            Configuration.LightBonusTerritoryId != null)
         {
             var dutyName = NovusDuty.GetValue(Configuration.LightBonusTerritoryId.Value).DutyName;
             var detectionDate = Configuration.LightBonusDetection.Value.ToLocalTime().ToString("t");
