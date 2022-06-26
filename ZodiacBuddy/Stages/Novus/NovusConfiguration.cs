@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace ZodiacBuddy.Novus;
 
@@ -14,6 +15,18 @@ public class NovusConfiguration
     private static readonly uint DefaultProgressColor = 0xFF943463;
 
     /// <summary>
+    /// Gets or sets the Territory Id of the current duty with bonus of light.
+    /// </summary>
+    [JsonIgnore]
+    public uint? LightBonusTerritoryId { get; set; }
+
+    /// <summary>
+    /// Gets or sets UTC time of detection of the current duty with bonus of light.
+    /// </summary>
+    [JsonIgnore]
+    public DateTime? LightBonusDetection { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether to display the information about the Novus weapons.
     /// </summary>
     public bool DisplayNovusInfo { get; set; } = true;
@@ -27,16 +40,6 @@ public class NovusConfiguration
     /// Gets or sets the color of the progress bar on Novus weapons information.
     /// </summary>
     public uint ProgressColor { get; set; } = DefaultProgressColor;
-
-    /// <summary>
-    /// Gets or sets the Territory Id of the current duty with bonus of light.
-    /// </summary>
-    public uint? LightBonusTerritoryId { get; set; }
-
-    /// <summary>
-    /// Gets or sets UTC time of detection of the current duty with bonus of light.
-    /// </summary>
-    public DateTime? LightBonusDetection { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether to show the actual numbers in the RelicGlass addon.
