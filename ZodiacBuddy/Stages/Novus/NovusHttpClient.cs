@@ -39,7 +39,7 @@ namespace ZodiacBuddy.Stages.Novus
         /// <inheritdoc/>
         public void Dispose()
         {
-            this.httpClient.Dispose();
+            this.httpClient?.Dispose();
         }
 
         /// <summary>
@@ -68,8 +68,10 @@ namespace ZodiacBuddy.Stages.Novus
         {
             if (this.clientState.LocalPlayer == null)
                 return;
+
             if (this.clientState.LocalPlayer.HomeWorld.GameData == null)
                 return;
+
             var datacenter = this.clientState.LocalPlayer.HomeWorld.GameData.DataCenter.Row;
             var world = this.clientState.LocalPlayer.HomeWorld.Id;
 
@@ -95,6 +97,7 @@ namespace ZodiacBuddy.Stages.Novus
                 {
                     if (response.StatusCode != HttpStatusCode.NotFound)
                         PluginLog.Warning($"{request.RequestUri} => [{response.StatusCode}] {content}");
+
                     return;
                 }
 
@@ -105,8 +108,7 @@ namespace ZodiacBuddy.Stages.Novus
         private void OnLastReportResponse(string content)
         {
             var report = JsonConvert.DeserializeObject<Report>(content);
-            if (this.ReportStillActive(report) &&
-                NovusDuty.TryGetValue(report.TerritoryId, out var territoryLight))
+            if (this.ReportStillActive(report) && NovusDuty.TryGetValue(report.TerritoryId, out var territoryLight))
             {
                 var message = $"Light bonus detected on \"{territoryLight?.DutyName}\"";
                 NovusManager.UpdateLightBonus(report.TerritoryId, report.Date, message);
@@ -128,12 +130,14 @@ namespace ZodiacBuddy.Stages.Novus
         private bool ReportStillActive(Report report)
         {
             var timeOfDay = DateTime.UtcNow.TimeOfDay;
-            var lastEvenHour = timeOfDay.Hours % 2 == 0 ?
-                TimeSpan.FromHours(timeOfDay.Hours - 2) :
-                TimeSpan.FromHours(timeOfDay.Hours - 1);
+            var lastEvenHour = timeOfDay.Hours % 2 == 0
+                ? TimeSpan.FromHours(timeOfDay.Hours - 2)
+                : TimeSpan.FromHours(timeOfDay.Hours - 1);
             var deltaSinceReport = report.Date.ToUniversalTime().TimeOfDay - lastEvenHour;
+
             // Still need to check DT for the day.
             var dt = DateTime.UtcNow.Subtract(TimeSpan.FromHours(2));
+
             return report.Date >= dt && deltaSinceReport.TotalSeconds > 0;
         }
     }

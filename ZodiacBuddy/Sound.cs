@@ -52,7 +52,7 @@ namespace ZodiacBuddy
         /// <param name="sound">Sound to play.</param>
         public void PlaySound(Sounds sound)
         {
-            this.playSound.Invoke(sound, 0, 0);
+            this.playSound(sound, 0, 0);
         }
     }
 }

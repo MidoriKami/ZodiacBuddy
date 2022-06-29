@@ -99,10 +99,8 @@ internal class NovusManager : IDisposable
 
         Service.Plugin.PrintMessage(message);
 
-        if (!Configuration.PlaySoundOnLightBonusNotification)
-            return;
-
-        Service.Sound.PlaySound(Sound.Sounds.Sound09);
+        if (Configuration.PlaySoundOnLightBonusNotification)
+            Service.Sound.PlaySound(Sound.Sounds.Sound09);
     }
 
     /// <inheritdoc/>
