@@ -50,6 +50,9 @@
     <!--<PackageReference Include="DalamudLinter" Version="1.0.3" />-->
     <PackageReference Include="DalamudPackager" Version="2.1.6" />
     <PackageReference Include="ILRepack" Version="2.0.18" GeneratePathProperty="true" />
+    <PackageReference Include="JWT" Version="9.0.3" />
+    <!-- Provided by Dalamud -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" ExcludeAssets="All" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.333">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

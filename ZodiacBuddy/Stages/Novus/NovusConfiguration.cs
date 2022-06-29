@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace ZodiacBuddy.Novus;
 
@@ -12,6 +13,18 @@ public class NovusConfiguration
     /// </summary>
     [NonSerialized]
     private static readonly uint DefaultProgressColor = 0xFF943463;
+
+    /// <summary>
+    /// Gets or sets the Territory Id of the current duty with bonus of light.
+    /// </summary>
+    [JsonIgnore]
+    public uint? LightBonusTerritoryId { get; set; }
+
+    /// <summary>
+    /// Gets or sets UTC time of detection of the current duty with bonus of light.
+    /// </summary>
+    [JsonIgnore]
+    public DateTime? LightBonusDetection { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether to display the information about the Novus weapons.
@@ -29,19 +42,14 @@ public class NovusConfiguration
     public uint ProgressColor { get; set; } = DefaultProgressColor;
 
     /// <summary>
-    /// Gets or sets the Territory Id of the current duty with bonus of light.
-    /// </summary>
-    public uint? LightBonusTerritoryId { get; set; }
-
-    /// <summary>
-    /// Gets or sets UTC time of detection of the current duty with bonus of light.
-    /// </summary>
-    public DateTime? LightBonusDetection { get; set; }
-
-    /// <summary>
     /// Gets or sets a value indicating whether to show the actual numbers in the RelicGlass addon.
     /// </summary>
     public bool ShowNumbersInRelicGlass { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to notify the user of new duty with bonus light when the relic is not equipped.
+    /// </summary>
+    public bool NotifyLightBonusOnlyWhenEquipped { get; set; } = true;
 
     /// <summary>
     /// Gets or sets a value indicating whether to not display the first message on the RelicGlass addon.

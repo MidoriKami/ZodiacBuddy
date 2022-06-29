@@ -88,12 +88,23 @@ namespace ZodiacBuddy
                 Service.Configuration.Save();
             }
 
+            ImGui.Separator();
+
+            var notifyBonusDuty = Service.Configuration.NovusConfiguration.NotifyLightBonusOnlyWhenEquipped;
+            if (ImGui.Checkbox("Notify duty with bonus only when Novus relic is equipped", ref notifyBonusDuty))
+            {
+                Service.Configuration.NovusConfiguration.NotifyLightBonusOnlyWhenEquipped = notifyBonusDuty;
+                Service.Configuration.Save();
+            }
+
             var playSound = Service.Configuration.NovusConfiguration.PlaySoundOnLightBonusNotification;
             if (ImGui.Checkbox("Play sound when notifying about light bonus", ref playSound))
             {
                 Service.Configuration.NovusConfiguration.PlaySoundOnLightBonusNotification = playSound;
                 Service.Configuration.Save();
             }
+
+            ImGui.Separator();
 
             var dontPlayRelicGlassAnimation = Service.Configuration.NovusConfiguration.DontPlayRelicGlassAnimation;
             if (ImGui.Checkbox("Skip text animation from the relic glass", ref dontPlayRelicGlassAnimation))

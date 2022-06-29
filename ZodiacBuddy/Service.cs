@@ -92,5 +92,10 @@ namespace ZodiacBuddy
         /// </summary>
         [PluginService]
         internal static ToastGui Toasts { get; private set; } = null!;
+
+        /// <summary>
+        /// Gets the sound manager.
+        /// </summary>
+        internal static Sound Sound { get; private set; } = new();
     }
 }

@@ -30,6 +30,9 @@ jobs:
       run: |
         Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile latest.zip
         Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev\"   
+    - name: Add Secret.cs
+      run: |
+        echo '${{ secrets.SECRETS_CS }}' > ZodiacBuddy/Secrets.cs
     - name: Build
       run: |
         dotnet restore -r win ${{ env.SOLUTION_NAME }}.sln
