@@ -15,12 +15,12 @@ using ZodiacBuddy.Novus;
 using ZodiacBuddy.Novus.Data;
 using ZodiacBuddy.Stages.Novus.Data;
 
-namespace ZodiacBuddy.Stages.Novus
+namespace ZodiacBuddy.Stages
 {
     /// <summary>
     /// Http client to share and retrieve reports about duty with Novus bonus of light.
     /// </summary>
-    internal class NovusHttpClient : IDisposable
+    internal class BonusLightHttpClient : IDisposable
     {
         private const string BaseUri = "https://zodiac-buddy-db.fly.dev";
         private readonly JwtEncoder encoder = new(new HMACSHA512Algorithm(), new JsonNetSerializer(), new JwtBase64UrlEncoder());
@@ -28,9 +28,9 @@ namespace ZodiacBuddy.Stages.Novus
         private readonly ClientState clientState;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="NovusHttpClient"/> class.
+        /// Initializes a new instance of the <see cref="BonusLightHttpClient"/> class.
         /// </summary>
-        public NovusHttpClient()
+        public BonusLightHttpClient()
         {
             this.httpClient = new HttpClient();
             this.clientState = Service.ClientState;

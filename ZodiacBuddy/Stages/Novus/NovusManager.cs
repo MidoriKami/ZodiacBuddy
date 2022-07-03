@@ -10,7 +10,7 @@ using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using ZodiacBuddy.Novus.Data;
-using ZodiacBuddy.Stages.Novus;
+using ZodiacBuddy.Stages;
 
 namespace ZodiacBuddy.Novus;
 
@@ -25,7 +25,7 @@ internal class NovusManager : IDisposable
     private readonly NovusWindow novusWindow;
     private readonly Timer resetTimer;
     private readonly Timer checkTimer;
-    private readonly NovusHttpClient client;
+    private readonly BonusLightHttpClient client;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NovusManager"/> class.
@@ -38,7 +38,7 @@ internal class NovusManager : IDisposable
         Service.Toasts.QuestToast += this.OnToast;
         Service.Interface.UiBuilder.Draw += this.novusWindow.Draw;
 
-        this.client = new NovusHttpClient();
+        this.client = new BonusLightHttpClient();
 
         var timeOfDay = DateTime.UtcNow.TimeOfDay;
         var nextEvenHour = timeOfDay.Hours % 2 == 0 ?

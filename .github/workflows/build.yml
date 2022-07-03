@@ -32,8 +32,7 @@ jobs:
         Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev\"   
     - name: Add Secret.cs
       run: |
-        cat ZodiacBuddy/secrets.cs | sed 's/$$JWT_TOKEN$$/${{ secrets.JWT_TOKEN }}/' > secrets.cs
-        mv secrets.cs ZodiacBuddy/secrets.cs
+        (Get-Content ZodiacBuddy\Secrets.cs).replace('$$JWT_TOKEN$$', '${{ secrets.JWT_TOKEN }}') | Set-Content ZodiacBuddy\Secrets.cs
     - name: Build
       run: |
         dotnet restore -r win ${{ env.SOLUTION_NAME }}.sln
