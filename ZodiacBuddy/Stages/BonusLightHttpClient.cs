@@ -91,12 +91,12 @@ namespace ZodiacBuddy.Stages
             {
                 var response = this.httpClient.Send(request);
                 var content = await response.Content.ReadAsStringAsync();
-                PluginLog.Verbose($"{request.RequestUri} => [{response.StatusCode}] {content}");
+                PluginLog.Verbose($"{request.RequestUri} => [{response.StatusCode:D}] {content}");
 
                 if (!response.IsSuccessStatusCode)
                 {
                     if (response.StatusCode != HttpStatusCode.NotFound)
-                        PluginLog.Warning($"{request.RequestUri} => [{response.StatusCode}] {content}");
+                        PluginLog.Warning($"{request.RequestUri} => [{response.StatusCode:D}] {content}");
 
                     return;
                 }
