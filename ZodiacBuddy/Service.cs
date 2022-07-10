@@ -9,6 +9,7 @@ using Dalamud.Game.Gui;
 using Dalamud.Game.Gui.Toast;
 using Dalamud.IoC;
 using Dalamud.Plugin;
+using ZodiacBuddy.BonusLight;
 
 namespace ZodiacBuddy
 {
@@ -26,6 +27,11 @@ namespace ZodiacBuddy
         /// Gets or sets the plugin configuration.
         /// </summary>
         internal static PluginConfiguration Configuration { get; set; } = null!;
+
+        /// <summary>
+        /// Gets or sets the plugin bonus light manager.
+        /// </summary>
+        internal static BonusLightManager BonusLightManager { get; set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud plugin interface.
@@ -92,10 +98,5 @@ namespace ZodiacBuddy
         /// </summary>
         [PluginService]
         internal static ToastGui Toasts { get; private set; } = null!;
-
-        /// <summary>
-        /// Gets the sound manager.
-        /// </summary>
-        internal static Sound Sound { get; private set; } = new();
     }
 }

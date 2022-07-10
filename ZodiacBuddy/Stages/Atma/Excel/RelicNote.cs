@@ -8,7 +8,7 @@ using Lumina.Excel.GeneratedSheets;
 #pragma warning disable SA1600 // Elements should be documented
 #pragma warning disable SA1601 // Partial elements should be documented
 
-namespace ZodiacBuddy.Excel
+namespace ZodiacBuddy.Stages.Atma.Excel
 {
     [Sheet("RelicNote", columnHash: 0xb557320e)]
     public partial class RelicNote : ExcelRow

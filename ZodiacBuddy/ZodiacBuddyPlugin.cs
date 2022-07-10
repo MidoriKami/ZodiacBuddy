@@ -3,8 +3,10 @@ using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
-using ZodiacBuddy.Atma;
-using ZodiacBuddy.Novus;
+using ZodiacBuddy.BonusLight;
+using ZodiacBuddy.Stages.Atma;
+using ZodiacBuddy.Stages.Brave;
+using ZodiacBuddy.Stages.Novus;
 
 namespace ZodiacBuddy
 {
@@ -17,6 +19,7 @@ namespace ZodiacBuddy
 
         private readonly AtmaManager animusBuddy;
         private readonly NovusManager novusManager;
+        private readonly BraveManager braveManager;
 
         private readonly WindowSystem windowSystem;
         private readonly ConfigWindow configWindow;
@@ -46,8 +49,10 @@ namespace ZodiacBuddy
                 ShowInHelp = true,
             });
 
+            Service.BonusLightManager = new BonusLightManager();
             this.animusBuddy = new AtmaManager();
             this.novusManager = new NovusManager();
+            this.braveManager = new BraveManager();
         }
 
         /// <inheritdoc/>
@@ -63,6 +68,8 @@ namespace ZodiacBuddy
 
             this.animusBuddy?.Dispose();
             this.novusManager?.Dispose();
+            this.braveManager?.Dispose();
+            Service.BonusLightManager?.Dispose();
         }
 
         /// <summary>

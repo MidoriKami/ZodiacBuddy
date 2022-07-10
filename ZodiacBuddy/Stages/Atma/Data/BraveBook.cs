@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Logging;
 
-namespace ZodiacBuddy.Atma.Data;
+namespace ZodiacBuddy.Stages.Atma.Data;
 
 /// <summary>
 /// A collection of targets for a single Trial of the Braves book.

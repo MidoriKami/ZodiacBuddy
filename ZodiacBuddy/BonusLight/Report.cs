@@ -2,10 +2,10 @@
 
 using Newtonsoft.Json;
 
-namespace ZodiacBuddy.Stages.Novus.Data
+namespace ZodiacBuddy.BonusLight
 {
     /// <summary>
-    /// Report strut to communicate with the server.
+    /// Report struct to communicate with the server.
     /// </summary>
     public struct Report
     {

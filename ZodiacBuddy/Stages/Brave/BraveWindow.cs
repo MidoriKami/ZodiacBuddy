@@ -1,23 +1,23 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
 using ZodiacBuddy.BonusLight;
-using ZodiacBuddy.Stages.Brave;
 
-namespace ZodiacBuddy.Stages.Novus;
+namespace ZodiacBuddy.Stages.Brave;
 
 /// <summary>
 /// Novus information window.
 /// </summary>
-public class NovusWindow
+public class BraveWindow
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="NovusWindow"/> class.
+    /// Initializes a new instance of the <see cref="BraveWindow"/> class.
     /// </summary>
-    public NovusWindow()
+    public BraveWindow()
     {
     }
 
@@ -46,7 +46,7 @@ public class NovusWindow
         if (!this.ShowWindow)
             return;
 
-        var name = "Novus Zodiac Information";
+        var name = "Zodiac Brave Information";
         var flags = ImGuiWindowFlags.NoResize
             | ImGuiWindowFlags.NoTitleBar
             | ImGuiWindowFlags.NoScrollbar;
@@ -56,7 +56,12 @@ public class NovusWindow
             this.DisplayRelicInfo(this.OffhandItem);
             this.DisplayBonusLight();
 
+            // Shrink
             ImGui.SetWindowSize(name, Vector2.Zero);
+
+            // Set minimum size.
+            var sz = ImGui.GetWindowSize();
+            ImGui.SetWindowSize(name, new Vector2(Math.Max(sz.X, 100f), sz.Y));
         }
 
         ImGui.End();
@@ -64,7 +69,7 @@ public class NovusWindow
 
     private void DisplayRelicInfo(InventoryItem item)
     {
-        if (!NovusRelic.Items.TryGetValue(item.ItemID, out var name))
+        if (!BraveRelic.Items.TryGetValue(item.ItemID, out var name))
             return;
 
         name = name
@@ -77,9 +82,19 @@ public class NovusWindow
             ? new Vector2(ImGui.GetWindowContentRegionWidth(), 0f)
             : new Vector2(130, 0f);
 
-        var value = item.Spiritbond;
-        var progress = value / 2000f;
-        ImGui.ProgressBar(progress, progressBarVector, $"{value}/2000");
+        var mahatmaValue = (item.Spiritbond / 500) + 1;
+        if (item.Spiritbond == 0)
+            mahatmaValue = 0;
+
+        var mahatmaProgress = mahatmaValue / 12f;
+        ImGui.ProgressBar(mahatmaProgress, progressBarVector, $"{mahatmaValue}/12");
+
+        var value = item.Spiritbond % 500;
+        if (value == 1)
+            value -= 1;
+
+        var progress = value / 80f;
+        ImGui.ProgressBar(progress, progressBarVector, $"{value / 2}/40");
 
         ImGui.PopStyleColor();
     }

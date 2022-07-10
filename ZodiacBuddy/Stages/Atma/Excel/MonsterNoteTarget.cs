@@ -8,7 +8,7 @@ using Lumina.Excel.GeneratedSheets;
 #pragma warning disable SA1600 // Elements should be documented
 #pragma warning disable SA1601 // Partial elements should be documented
 
-namespace ZodiacBuddy.Excel
+namespace ZodiacBuddy.Stages.Atma.Excel
 {
     [Sheet("MonsterNoteTarget", columnHash: 0x4157404f)]
     public partial class MonsterNoteTarget : ExcelRow

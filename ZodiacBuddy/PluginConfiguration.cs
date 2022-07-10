@@ -3,7 +3,9 @@ using System;
 using Dalamud.Configuration;
 using Dalamud.Game.Text;
 using Newtonsoft.Json;
-using ZodiacBuddy.Novus;
+using ZodiacBuddy.BonusLight;
+using ZodiacBuddy.Stages.Brave;
+using ZodiacBuddy.Stages.Novus;
 
 namespace ZodiacBuddy
 {
@@ -30,9 +32,19 @@ namespace ZodiacBuddy
         public bool BraveEchoTarget { get; set; } = true;
 
         /// <summary>
-        /// Gets configuration for Novus relic.
+        /// Gets the configuration for bonus light options.
         /// </summary>
-        public NovusConfiguration NovusConfiguration { get; } = new();
+        public BonusLightConfiguration BonusLight { get; } = new();
+
+        /// <summary>
+        /// Gets the configuration for Novus relics.
+        /// </summary>
+        public NovusConfiguration Novus { get; } = new();
+
+        /// <summary>
+        /// Gets configuration for Zodiac Brave relics.
+        /// </summary>
+        public BraveConfiguration Brave { get; } = new();
 
         /// <summary>
         /// Save the configuration to disk.

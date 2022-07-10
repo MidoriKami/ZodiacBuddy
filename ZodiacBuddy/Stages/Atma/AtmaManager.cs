@@ -12,11 +12,11 @@ using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using ZodiacBuddy.Atma.Data;
+using ZodiacBuddy.Stages.Atma.Data;
 
 using Sheets = Lumina.Excel.GeneratedSheets;
 
-namespace ZodiacBuddy.Atma;
+namespace ZodiacBuddy.Stages.Atma;
 
 /// <summary>
 /// Your buddy for the Atma enhancement stage.

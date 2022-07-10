@@ -3,15 +3,15 @@
 using Dalamud.Utility;
 using Lumina.Excel.GeneratedSheets;
 
-namespace ZodiacBuddy.Novus.Data;
+namespace ZodiacBuddy.BonusLight;
 
 /// <summary>
 /// Define a duty susceptible to have the light bonus.
 /// </summary>
-public class NovusDuty
+public class BonusLightDuty
 {
     // key: Territory ID
-    private static readonly Dictionary<uint, NovusDuty> Dataset = new()
+    private static readonly Dictionary<uint, BonusLightDuty> Dataset = new()
     {
         #pragma warning disable format,SA1008,SA1025
         // Hard Trials and Urth's Fount
@@ -44,7 +44,7 @@ public class NovusDuty
         { 196, new(196, 32) }, // the Final Coil of Bahamut - Turn 4
 
         // Extreme Trials
-        { 348, new(348, 16) }, // the Minstrel's Ballad: Ultima's B
+        { 348, new(348, 16) }, // the Minstrel's Ballad: Ultima's Bane
         { 295, new(295, 32) }, // the Bowl of Embers (Extreme)
         { 297, new(297, 16) }, // the Howling Eye (Extreme)
         { 296, new(296, 32) }, // the Navel (Extreme)
@@ -87,23 +87,23 @@ public class NovusDuty
         {  189, new( 189, 48) }, // Amdapor Keep (Hard)
 
         // PVP
-        { 376, new NovusDuty(376, 48) }, // The Borderland Ruins (Secure)
+        {  376, new(376, 48) }, // The Borderland Ruins (Secure)
 
         // Alliance Raids
-        { 151, new NovusDuty(151, 48) }, // The World of Darkness
-        { 174, new NovusDuty(174, 96) }, // Labyrinth of the Ancients
-        { 372, new NovusDuty(372, 96) }, // Syrcus Tower
+        {  151, new(151, 96) }, // The World of Darkness
+        {  174, new(174, 48) }, // Labyrinth of the Ancients
+        {  372, new(372, 96) }, // Syrcus Tower
         #pragma warning restore format,SA1008,SA1025
     };
 
-    private NovusDuty(uint territoryId, uint defaultLightIntensity)
+    private BonusLightDuty(uint territoryId, uint defaultLightIntensity)
     {
         this.DefaultLightIntensity = defaultLightIntensity;
-        var territory = Service.DataManager.Excel.GetSheet<TerritoryType>()!
-            .GetRow(territoryId)!;
 
-        this.DutyName = territory.ContentFinderCondition.Value!
-            .Name.ToDalamudString()
+        this.DutyName = Service.DataManager.Excel.GetSheet<TerritoryType>()!
+            .GetRow(territoryId)!
+            .ContentFinderCondition.Value!.Name
+            .ToDalamudString()
             .ToString()!;
     }
 
@@ -122,7 +122,7 @@ public class NovusDuty
     /// </summary>
     /// <param name="territoryID">Territory ID.</param>
     /// <returns>Novus duty data.</returns>
-    public static NovusDuty GetValue(uint territoryID)
+    public static BonusLightDuty GetValue(uint territoryID)
         => Dataset[territoryID];
 
     /// <summary>
@@ -131,6 +131,6 @@ public class NovusDuty
     /// <param name="territoryID">Territory ID.</param>
     /// <param name="duty">Novus duty data.</param>
     /// <returns>True if the duty was found, otherwise false.</returns>
-    public static bool TryGetValue(uint territoryID, out NovusDuty? duty)
+    public static bool TryGetValue(uint territoryID, out BonusLightDuty? duty)
         => Dataset.TryGetValue(territoryID, out duty);
 }
