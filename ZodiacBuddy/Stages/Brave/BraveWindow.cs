@@ -107,7 +107,9 @@ public class BraveWindow
         if (Configuration.LightBonusDetection != null &&
             Configuration.LightBonusTerritoryId != null)
         {
-            var dutyName = BonusLightDuty.GetValue(Configuration.LightBonusTerritoryId.Value).DutyName;
+            var dutyName = BonusLightDuty.GetValue(Configuration.LightBonusTerritoryId.Value).DutyName
+                .Replace("Œ", "Oe")
+                .Replace("œ", "oe");
             var detectionDate = Configuration.LightBonusDetection.Value.ToLocalTime().ToString("t");
 
             ImGui.PushFont(UiBuilder.IconFont);
