@@ -180,7 +180,7 @@ internal class BonusLightManager : IDisposable
     {
         var timeOfDay = DateTime.UtcNow.TimeOfDay;
         var lastEvenHour = timeOfDay.Hours % 2 == 0
-            ? TimeSpan.FromHours(timeOfDay.Hours - 2)
+            ? TimeSpan.FromHours(timeOfDay.Hours)
             : TimeSpan.FromHours(timeOfDay.Hours - 1);
         var deltaSinceReport = report.Date.ToUniversalTime().TimeOfDay - lastEvenHour;
 
