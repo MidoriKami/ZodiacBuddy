@@ -79,10 +79,10 @@ internal class BonusLightManager : IDisposable
             var mainhand = Util.GetEquippedItem(0);
             var offhand = Util.GetEquippedItem(1);
 
-            if (NovusRelic.Items.ContainsKey(mainhand.ItemID) ||
-                NovusRelic.Items.ContainsKey(offhand.ItemID) ||
-                BraveRelic.Items.ContainsKey(mainhand.ItemID) ||
-                BraveRelic.Items.ContainsKey(offhand.ItemID))
+            if (!NovusRelic.Items.ContainsKey(mainhand.ItemID) &&
+                !NovusRelic.Items.ContainsKey(offhand.ItemID) &&
+                !BraveRelic.Items.ContainsKey(mainhand.ItemID) &&
+                !BraveRelic.Items.ContainsKey(offhand.ItemID))
             {
                 return;
             }
