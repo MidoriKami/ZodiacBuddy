@@ -24,8 +24,8 @@ internal class BonusLightManager : IDisposable
     private const string BaseUri = "https://zodiac-buddy-db.fly.dev";
     private readonly JwtEncoder encoder;
     private readonly HttpClient httpClient;
-    private readonly Timer checkTimer;
     private readonly Timer resetTimer;
+    private Timer? checkTimer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BonusLightManager"/> class.
@@ -41,7 +41,9 @@ internal class BonusLightManager : IDisposable
             TimeSpan.FromHours(timeOfDay.Hours + 1);
         var delta = nextEvenHour - timeOfDay;
 
-        this.checkTimer = new Timer(_ => this.CheckBonus(), null, TimeSpan.FromSeconds(2), TimeSpan.FromMinutes(5));
+        Service.ClientState.Login += this.OnLogin;
+        Service.ClientState.Logout += this.OnLogout;
+        if (Service.ClientState.LocalPlayer is not null) this.OnLogin(null, null!);
         this.resetTimer = new Timer(_ => this.ResetBonus(), null, delta, TimeSpan.FromHours(2));
     }
 
@@ -50,6 +52,8 @@ internal class BonusLightManager : IDisposable
     /// <inheritdoc/>
     public void Dispose()
     {
+        Service.ClientState.Login -= this.OnLogin;
+        Service.ClientState.Logout -= this.OnLogout;
         this.resetTimer?.Dispose();
         this.checkTimer?.Dispose();
         this.httpClient?.Dispose();
@@ -75,10 +79,10 @@ internal class BonusLightManager : IDisposable
             var mainhand = Util.GetEquippedItem(0);
             var offhand = Util.GetEquippedItem(1);
 
-            if (NovusRelic.Items.ContainsKey(mainhand.ItemID) ||
-                NovusRelic.Items.ContainsKey(offhand.ItemID) ||
-                BraveRelic.Items.ContainsKey(mainhand.ItemID) ||
-                BraveRelic.Items.ContainsKey(offhand.ItemID))
+            if (!NovusRelic.Items.ContainsKey(mainhand.ItemID) &&
+                !NovusRelic.Items.ContainsKey(offhand.ItemID) &&
+                !BraveRelic.Items.ContainsKey(mainhand.ItemID) &&
+                !BraveRelic.Items.ContainsKey(offhand.ItemID))
             {
                 return;
             }
@@ -142,9 +146,24 @@ internal class BonusLightManager : IDisposable
 
         var datacenter = Service.ClientState.LocalPlayer.HomeWorld.GameData.DataCenter.Row;
 
+        if (datacenter == 0)
+            return;
+
         var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUri}/reports/last/{datacenter}");
 
         this.Send(request, this.OnLastReportResponse);
+    }
+
+    private void OnLogin(object? sender, EventArgs e)
+    {
+        this.checkTimer?.Dispose();
+        this.checkTimer = new Timer(_ => this.CheckBonus(), null, TimeSpan.FromSeconds(2), TimeSpan.FromMinutes(5));
+    }
+
+    private void OnLogout(object? sender, EventArgs e)
+    {
+        this.checkTimer?.Dispose();
+        this.ResetBonus();
     }
 
     private void OnLastReportResponse(string content)
@@ -161,7 +180,7 @@ internal class BonusLightManager : IDisposable
     {
         var timeOfDay = DateTime.UtcNow.TimeOfDay;
         var lastEvenHour = timeOfDay.Hours % 2 == 0
-            ? TimeSpan.FromHours(timeOfDay.Hours - 2)
+            ? TimeSpan.FromHours(timeOfDay.Hours)
             : TimeSpan.FromHours(timeOfDay.Hours - 1);
         var deltaSinceReport = report.Date.ToUniversalTime().TimeOfDay - lastEvenHour;
 
@@ -194,12 +213,12 @@ internal class BonusLightManager : IDisposable
     private string GenerateJWT()
     {
         var payload = new Dictionary<string, object>
-            {
-                { "sub", Service.ClientState.LocalContentId },
-                { "aud", "ZodiacBuddy" },
-                { "iss", "ZodiacBuddyDB" },
-                { "iat", DateTimeOffset.UtcNow.ToUnixTimeSeconds() },
-            };
+        {
+            { "sub", Service.ClientState.LocalContentId },
+            { "aud", "ZodiacBuddy" },
+            { "iss", "ZodiacBuddyDB" },
+            { "iat", DateTimeOffset.UtcNow.ToUnixTimeSeconds() },
+        };
 
         return this.encoder.Encode(payload, TimeSpan.FromMinutes(15));
     }
