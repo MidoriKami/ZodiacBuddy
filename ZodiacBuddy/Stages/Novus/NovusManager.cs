@@ -173,28 +173,13 @@ internal class NovusManager : IDisposable
 
             Service.Plugin.PrintMessage($"Light Intensity has increased by {lightLevel.Intensity}.");
 
-            var territoryID = Service.ClientState.TerritoryType;
-            if (!BonusLightDuty.TryGetValue(territoryID, out var territoryLight))
+            var territoryId = Service.ClientState.TerritoryType;
+            if (!BonusLightDuty.TryGetValue(territoryId, out var territoryLight))
                 return;
 
-            if (territoryID == LightConfiguration.LightBonusTerritoryId)
+            if (lightLevel.Intensity > territoryLight!.DefaultLightIntensity)
             {
-                if (lightLevel.Intensity <= territoryLight!.DefaultLightIntensity)
-                {
-                    // No longer light bonus
-                    Service.BonusLightManager.UpdateLightBonus(null, null, $"\"{territoryLight.DutyName}\" no longer has the bonus of light.");
-                }
-                else
-                {
-                    // Update dateTime
-                    Service.BonusLightManager.UpdateLightBonus(territoryID, DateTime.UtcNow, null);
-                }
-            }
-            else if (lightLevel.Intensity > territoryLight!.DefaultLightIntensity)
-            {
-                // New detection
-                Service.BonusLightManager.UpdateLightBonus(territoryID, DateTime.UtcNow, $"Light bonus detected on \"{territoryLight.DutyName}\"");
-                Service.BonusLightManager.SendReport(territoryID);
+                Service.BonusLightManager.AddLightBonus(territoryId, $"Light bonus detected on \"{territoryLight.DutyName}\"");
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using Newtonsoft.Json;
 
@@ -10,16 +11,10 @@ namespace ZodiacBuddy.BonusLight;
 public class BonusLightConfiguration
 {
     /// <summary>
-    /// Gets or sets the Territory Id of the current duty with bonus of light.
+    /// Gets the list of Territory Id of duty with bonus of light.
     /// </summary>
     [JsonIgnore]
-    public uint? LightBonusTerritoryId { get; set; }
-
-    /// <summary>
-    /// Gets or sets UTC time of detection of the current duty with bonus of light.
-    /// </summary>
-    [JsonIgnore]
-    public DateTime? LightBonusDetection { get; set; }
+    public List<uint> ActiveBonus { get; } = new();
 
     /// <summary>
     /// Gets or sets a value indicating whether to display the current duty with light bonus on the Novus information window.
