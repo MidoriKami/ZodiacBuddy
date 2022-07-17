@@ -74,7 +74,7 @@ public class NovusWindow
 
         ImGui.PushStyleColor(ImGuiCol.PlotHistogram, Configuration.ProgressColor);
         var progressBarVector = Configuration.DisplayBonusDuty
-            ? new Vector2(ImGui.GetWindowContentRegionMax().X, 0f)
+            ? new Vector2(ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X, 0f)
             : new Vector2(130, 0f);
 
         var value = item.Spiritbond;
