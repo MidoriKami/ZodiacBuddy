@@ -182,12 +182,8 @@ internal class BonusLightManager : IDisposable
         var lastEvenHour = timeOfDay.Hours % 2 == 0
             ? TimeSpan.FromHours(timeOfDay.Hours)
             : TimeSpan.FromHours(timeOfDay.Hours - 1);
-        var deltaSinceReport = report.Date.ToUniversalTime().TimeOfDay - lastEvenHour;
-
-        // Still need to check DT for the day.
-        var dt = DateTime.UtcNow.Subtract(TimeSpan.FromHours(2));
-
-        return report.Date >= dt && deltaSinceReport.TotalSeconds > 0;
+        var deltaSinceLastEvenHour = timeOfDay - lastEvenHour;
+        return report.Date >= DateTime.UtcNow.Subtract(deltaSinceLastEvenHour);
     }
 
     private void Send(HttpRequestMessage request, Action<string>? successCallback)
