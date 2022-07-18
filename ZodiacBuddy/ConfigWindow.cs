@@ -31,6 +31,9 @@ namespace ZodiacBuddy
             if (ImGui.CollapsingHeader("General"))
                 this.DrawGeneral();
 
+            if (ImGui.CollapsingHeader("Interface"))
+                this.DrawInterface();
+
             if (ImGui.CollapsingHeader("Bonus Light"))
                 this.DrawBonusLight();
 
@@ -61,6 +64,58 @@ namespace ZodiacBuddy
                 Service.Configuration.ChatType = channels[current];
                 Service.Configuration.Save();
             }
+
+            ImGui.Spacing();
+        }
+
+        private void DrawInterface()
+        {
+            var manualSize = Service.Configuration.InformationWindow.ManualSize;
+            if (ImGui.Checkbox("Manual size for relic information", ref manualSize))
+            {
+                Service.Configuration.InformationWindow.ManualSize = manualSize;
+                Service.Configuration.Save();
+            }
+
+            var clickThrough = Service.Configuration.InformationWindow.ClickThrough;
+            if (ImGui.Checkbox("Click through relic information", ref clickThrough))
+            {
+                Service.Configuration.InformationWindow.ClickThrough = clickThrough;
+                Service.Configuration.Save();
+            }
+
+            ImGui.PushItemWidth(150f);
+            var progressSize = Service.Configuration.InformationWindow.ProgressSize;
+            if (ImGui.SliderInt("Light progress size ", ref progressSize, 80, 500))
+            {
+                Service.Configuration.InformationWindow.ProgressSize = progressSize;
+                Service.Configuration.Save();
+            }
+
+            ImGui.SameLine();
+            var progressAutoSize = Service.Configuration.InformationWindow.ProgressAutoSize;
+            if (ImGui.Checkbox("Automatic", ref progressAutoSize))
+            {
+                Service.Configuration.InformationWindow.ProgressAutoSize = progressAutoSize;
+                Service.Configuration.Save();
+            }
+
+            var progressColor = ImGui.ColorConvertU32ToFloat4(Service.Configuration.InformationWindow.ProgressColor);
+            if (ImGui.ColorEdit4("Light progress color", ref progressColor, ImGuiColorEditFlags.DisplayHex | ImGuiColorEditFlags.PickerHueWheel))
+            {
+                Service.Configuration.InformationWindow.ProgressColor = ImGui.ColorConvertFloat4ToU32(progressColor);
+                Service.Configuration.Save();
+            }
+
+            ImGui.PopItemWidth();
+            ImGui.SameLine();
+            if (ImGui.Button("Reset"))
+            {
+                Service.Configuration.InformationWindow.ResetProgressColor();
+                Service.Configuration.Save();
+            }
+
+            ImGui.Spacing();
         }
 
         private void DrawBonusLight()
@@ -100,22 +155,7 @@ namespace ZodiacBuddy
             if (ImGui.Button("Play sound##LightBonusSound"))
                 UIModule.PlayChatSoundEffect((uint)soundId);
 
-            ImGui.Separator();
-
-            ImGui.PushItemWidth(150f);
-            var progressColor = ImGui.ColorConvertU32ToFloat4(Service.Configuration.BonusLight.ProgressColor);
-            if (ImGui.ColorEdit4("Light progress color", ref progressColor, ImGuiColorEditFlags.DisplayHex | ImGuiColorEditFlags.PickerHueWheel))
-            {
-                Service.Configuration.BonusLight.ProgressColor = ImGui.ColorConvertFloat4ToU32(progressColor);
-                Service.Configuration.Save();
-            }
-
-            ImGui.SameLine();
-            if (ImGui.Button("Reset"))
-            {
-                Service.Configuration.BonusLight.ResetProgressColor();
-                Service.Configuration.Save();
-            }
+            ImGui.Spacing();
         }
 
         private void DrawAtma()
@@ -128,6 +168,8 @@ namespace ZodiacBuddy
                 Service.Configuration.BraveEchoTarget = braveEcho;
                 Service.Configuration.Save();
             }
+
+            ImGui.Spacing();
         }
 
         private void DrawNovus()
@@ -152,6 +194,8 @@ namespace ZodiacBuddy
                 Service.Configuration.Novus.ShowNumbersInRelicGlass = showNumbers;
                 Service.Configuration.Save();
             }
+
+            ImGui.Spacing();
         }
 
         private void DrawBrave()
@@ -162,6 +206,9 @@ namespace ZodiacBuddy
                 Service.Configuration.Brave.DisplayRelicInfo = showRelicWindow;
                 Service.Configuration.Save();
             }
+
+            ImGui.PopItemWidth();
+            ImGui.Separator();
 
             var skipAnimation = Service.Configuration.Brave.DontPlayRelicMagiciteAnimation;
             if (ImGui.Checkbox("Skip text animation from the relic magicite", ref skipAnimation))
@@ -176,6 +223,8 @@ namespace ZodiacBuddy
                 Service.Configuration.Brave.ShowNumbersInRelicMagicite = showNumbers;
                 Service.Configuration.Save();
             }
+
+            ImGui.Spacing();
         }
     }
 }

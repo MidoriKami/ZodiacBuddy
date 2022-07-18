@@ -4,6 +4,7 @@ using Dalamud.Configuration;
 using Dalamud.Game.Text;
 using Newtonsoft.Json;
 using ZodiacBuddy.BonusLight;
+using ZodiacBuddy.InformationWindow;
 using ZodiacBuddy.Stages.Brave;
 using ZodiacBuddy.Stages.Novus;
 
@@ -45,6 +46,11 @@ namespace ZodiacBuddy
         /// Gets configuration for Zodiac Brave relics.
         /// </summary>
         public BraveConfiguration Brave { get; } = new();
+
+        /// <summary>
+        /// Gets configuration for the information window.
+        /// </summary>
+        public InformationWindowConfiguration InformationWindow { get; } = new();
 
         /// <summary>
         /// Save the configuration to disk.
