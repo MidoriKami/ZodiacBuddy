@@ -207,9 +207,6 @@ namespace ZodiacBuddy
                 Service.Configuration.Save();
             }
 
-            ImGui.PopItemWidth();
-            ImGui.Separator();
-
             var skipAnimation = Service.Configuration.Brave.DontPlayRelicMagiciteAnimation;
             if (ImGui.Checkbox("Skip text animation from the relic magicite", ref skipAnimation))
             {

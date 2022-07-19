@@ -58,7 +58,10 @@ public abstract class InformationWindow
                     ImGuiWindowFlags.NoTitleBar |
                     ImGuiWindowFlags.NoScrollbar;
 
-        flags |= InfoWindowConfiguration.ClickThrough ? ImGuiWindowFlags.NoInputs : ImGuiWindowFlags.None;
+        flags |= InfoWindowConfiguration.ClickThrough
+            ? ImGuiWindowFlags.NoInputs
+            : ImGuiWindowFlags.None;
+
         if (ImGui.Begin(this.Name, flags))
         {
             this.DisplayRelicInfo(this.MainhandItem);
