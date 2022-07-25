@@ -2,6 +2,7 @@ using System;
 using System.Numerics;
 
 using Dalamud.Game.Text;
+using Dalamud.Interface.Colors;
 using Dalamud.Interface.Windowing;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using ImGuiNET;
@@ -120,6 +121,25 @@ namespace ZodiacBuddy
 
         private void DrawBonusLight()
         {
+            string status;
+            Vector4 statusColor;
+            if (Service.BonusLightManager.LastRequestIsSuccess)
+            {
+                status = "OK";
+                statusColor = ImGuiColors.HealerGreen;
+            }
+            else
+            {
+                status = "Error";
+                statusColor = ImGuiColors.DalamudRed;
+            }
+
+            ImGui.Text("Info: The bonus light is crowdsourced.");
+            ImGui.Text("Server status: ");
+            ImGui.SameLine();
+            ImGui.TextColored(statusColor, status);
+            ImGui.Spacing();
+
             var displayBonusDuty = Service.Configuration.BonusLight.DisplayBonusDuty;
             if (ImGui.Checkbox("Display duty with the bonus of light in relic info windows", ref displayBonusDuty))
             {

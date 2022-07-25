@@ -46,6 +46,11 @@ internal class BonusLightManager : IDisposable
         this.resetTimer = new Timer(_ => this.ResetBonus(), null, delta, TimeSpan.FromHours(2));
     }
 
+    /// <summary>
+    /// Gets a value indicating whether if the last request was successful.
+    /// </summary>
+    public bool LastRequestIsSuccess { get; private set; } = true;
+
     private static BonusLightConfiguration LightConfiguration => Service.Configuration.BonusLight;
 
     /// <inheritdoc/>
@@ -167,7 +172,7 @@ internal class BonusLightManager : IDisposable
     private void OnLastReportResponse(string content)
     {
         var reports = JsonConvert.DeserializeObject<List<Report>>(content);
-        if (reports == null)
+        if (reports == null || reports.Count == 0)
             return;
 
         var listUpdated = new List<string> { "New light bonus detected" };
@@ -182,10 +187,9 @@ internal class BonusLightManager : IDisposable
             }
         }
 
-        Service.Configuration.Save();
-
         if (listUpdated.Count > 1)
         {
+            Service.Configuration.Save();
             this.NotifyLightBonus(listUpdated.ToArray());
         }
     }
@@ -204,19 +208,26 @@ internal class BonusLightManager : IDisposable
     {
         Task.Run(async () =>
         {
-            var response = this.httpClient.Send(request);
-            var content = await response.Content.ReadAsStringAsync();
-            PluginLog.Verbose($"{request.RequestUri} => [{response.StatusCode:D}] {content}");
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                if (response.StatusCode != HttpStatusCode.NotFound)
+                var response = this.httpClient.Send(request);
+                var content = await response.Content.ReadAsStringAsync();
+
+                this.LastRequestIsSuccess = response.IsSuccessStatusCode;
+                if (!response.IsSuccessStatusCode)
+                {
                     PluginLog.Warning($"{request.RequestUri} => [{response.StatusCode:D}] {content}");
+                    return;
+                }
 
-                return;
+                PluginLog.Verbose($"{request.RequestUri} => [{response.StatusCode:D}] {content}");
+                successCallback?.Invoke(content);
             }
-
-            successCallback?.Invoke(content);
+            catch (HttpRequestException e)
+            {
+                PluginLog.Error($"{request.RequestUri} => {e}");
+                this.LastRequestIsSuccess = false;
+            }
         });
     }
 
