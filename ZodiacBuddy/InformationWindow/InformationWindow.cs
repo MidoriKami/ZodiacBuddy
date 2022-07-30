@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
@@ -95,7 +96,7 @@ public abstract class InformationWindow
 
         if (InfoWindowConfiguration.ManualSize ||
             (BonusConfiguration.DisplayBonusDuty &&
-             BonusConfiguration.LightBonusTerritoryId != null))
+             BonusConfiguration.ActiveBonus.Count > 0))
             return Vector2.Zero with { X = ImGui.GetContentRegionAvail().X - 1 };
 
         var vector = ImGui.CalcTextSize(relicName) with { Y = 0f };
@@ -110,22 +111,28 @@ public abstract class InformationWindow
         if (!BonusConfiguration.DisplayBonusDuty)
             return;
 
-        if (BonusConfiguration.LightBonusDetection != null &&
-            BonusConfiguration.LightBonusTerritoryId != null)
+        if (BonusConfiguration.ActiveBonus.Count > 0)
         {
-            var dutyName = BonusLightDuty.GetValue(BonusConfiguration.LightBonusTerritoryId.Value).DutyName
-                .Replace("Œ", "Oe")
-                .Replace("œ", "oe");
-            var detectionDate = BonusConfiguration.LightBonusDetection.Value.ToLocalTime().ToString("t");
-
             ImGui.PushFont(UiBuilder.IconFont);
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
-            ImGui.Text(FontAwesomeIcon.Lightbulb.ToIconString());
-            ImGui.PopStyleColor();
+            ImGui.TextColored(ImGuiColors.DalamudYellow, FontAwesomeIcon.Lightbulb.ToIconString());
             ImGui.PopFont();
 
+            var timeOfDay = DateTime.Now.TimeOfDay;
+            var startEvenHour = timeOfDay.Hours % 2 == 0
+                ? TimeSpan.FromHours(timeOfDay.Hours)
+                : TimeSpan.FromHours(timeOfDay.Hours - 1);
+            var startWindowDate = startEvenHour.ToString(@"hh\:mm");
+            var endWindowDate = startEvenHour.Add(TimeSpan.FromHours(2)).ToString(@"hh\:mm");
             ImGui.SameLine();
-            ImGui.Text($"{detectionDate} \"{dutyName}\"");
+            ImGui.Text($"{startWindowDate} - {endWindowDate}");
+
+            foreach (var territoryId in BonusConfiguration.ActiveBonus)
+            {
+                var dutyName = BonusLightDuty.GetValue(territoryId).DutyName
+                    .Replace("Œ", "Oe")
+                    .Replace("œ", "oe");
+                ImGui.Text($"\"{dutyName}\"");
+            }
         }
     }
 }

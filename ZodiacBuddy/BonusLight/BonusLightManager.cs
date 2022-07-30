@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -36,9 +35,9 @@ internal class BonusLightManager : IDisposable
         this.httpClient = new HttpClient();
 
         var timeOfDay = DateTime.UtcNow.TimeOfDay;
-        var nextEvenHour = timeOfDay.Hours % 2 == 0 ?
-            TimeSpan.FromHours(timeOfDay.Hours + 2) :
-            TimeSpan.FromHours(timeOfDay.Hours + 1);
+        var nextEvenHour = timeOfDay.Hours % 2 == 0
+            ? TimeSpan.FromHours(timeOfDay.Hours + 2)
+            : TimeSpan.FromHours(timeOfDay.Hours + 1);
         var delta = nextEvenHour - timeOfDay;
 
         Service.ClientState.Login += this.OnLogin;
@@ -46,6 +45,11 @@ internal class BonusLightManager : IDisposable
         if (Service.ClientState.LocalPlayer is not null) this.OnLogin(null, null!);
         this.resetTimer = new Timer(_ => this.ResetBonus(), null, delta, TimeSpan.FromHours(2));
     }
+
+    /// <summary>
+    /// Gets a value indicating whether if the last request was successful.
+    /// </summary>
+    public bool LastRequestIsSuccess { get; private set; } = true;
 
     private static BonusLightConfiguration LightConfiguration => Service.Configuration.BonusLight;
 
@@ -63,45 +67,21 @@ internal class BonusLightManager : IDisposable
     /// Update the bonus light configuration and play any notifications required.
     /// </summary>
     /// <param name="territoryId">Territory ID.</param>
-    /// <param name="date">Date.</param>
     /// <param name="message">Message to display.</param>
-    public void UpdateLightBonus(uint? territoryId, DateTime? date, string? message)
+    public void AddLightBonus(uint territoryId, string message)
     {
-        LightConfiguration.LightBonusTerritoryId = territoryId;
-        LightConfiguration.LightBonusDetection = date;
+        LightConfiguration.ActiveBonus.Add(territoryId);
         Service.Configuration.Save();
 
-        if (message == null)
-            return;
-
-        if (LightConfiguration.NotifyLightBonusOnlyWhenEquipped)
-        {
-            var mainhand = Util.GetEquippedItem(0);
-            var offhand = Util.GetEquippedItem(1);
-
-            if (!NovusRelic.Items.ContainsKey(mainhand.ItemID) &&
-                !NovusRelic.Items.ContainsKey(offhand.ItemID) &&
-                !BraveRelic.Items.ContainsKey(mainhand.ItemID) &&
-                !BraveRelic.Items.ContainsKey(offhand.ItemID))
-            {
-                return;
-            }
-        }
-
-        Service.Plugin.PrintMessage(message);
-
-        if (LightConfiguration.PlaySoundOnLightBonusNotification)
-        {
-            var soundId = (uint)LightConfiguration.LightBonusNotificationSound;
-            UIModule.PlayChatSoundEffect(soundId);
-        }
+        this.NotifyLightBonus(new[] { message });
+        this.SendReport(territoryId);
     }
 
     /// <summary>
     /// Send a new bonus light event to the server.
     /// </summary>
     /// <param name="territoryId">Id of the duty with the light bonus.</param>
-    public void SendReport(uint territoryId)
+    private void SendReport(uint territoryId)
     {
         if (Service.ClientState.LocalPlayer == null)
             return;
@@ -122,15 +102,42 @@ internal class BonusLightManager : IDisposable
         this.Send(request, null);
     }
 
-    private void CheckBonus()
+    /// <summary>
+    /// Play any notifications required.
+    /// </summary>
+    /// <param name="message">Message to display.</param>
+    private void NotifyLightBonus(string[] message)
     {
-        if (LightConfiguration.LightBonusDetection == null)
-            this.RetrieveLastReport();
+        if (LightConfiguration.NotifyLightBonusOnlyWhenEquipped)
+        {
+            var mainhand = Util.GetEquippedItem(0);
+            var offhand = Util.GetEquippedItem(1);
+
+            if (!NovusRelic.Items.ContainsKey(mainhand.ItemID) &&
+                !NovusRelic.Items.ContainsKey(offhand.ItemID) &&
+                !BraveRelic.Items.ContainsKey(mainhand.ItemID) &&
+                !BraveRelic.Items.ContainsKey(offhand.ItemID))
+            {
+                return;
+            }
+        }
+
+        foreach (string s in message)
+        {
+            Service.Plugin.PrintMessage(s);
+        }
+
+        if (LightConfiguration.PlaySoundOnLightBonusNotification)
+        {
+            var soundId = (uint)LightConfiguration.LightBonusNotificationSound;
+            UIModule.PlayChatSoundEffect(soundId);
+        }
     }
 
     private void ResetBonus()
     {
-        this.UpdateLightBonus(null, null, null);
+        LightConfiguration.ActiveBonus.Clear();
+        Service.Configuration.Save();
     }
 
     /// <summary>
@@ -144,12 +151,7 @@ internal class BonusLightManager : IDisposable
         if (Service.ClientState.LocalPlayer.HomeWorld.GameData == null)
             return;
 
-        var datacenter = Service.ClientState.LocalPlayer.HomeWorld.GameData.DataCenter.Row;
-
-        if (datacenter == 0)
-            return;
-
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUri}/reports/last/{datacenter}");
+        var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUri}/reports/active");
 
         this.Send(request, this.OnLastReportResponse);
     }
@@ -157,7 +159,8 @@ internal class BonusLightManager : IDisposable
     private void OnLogin(object? sender, EventArgs e)
     {
         this.checkTimer?.Dispose();
-        this.checkTimer = new Timer(_ => this.CheckBonus(), null, TimeSpan.FromSeconds(2), TimeSpan.FromMinutes(5));
+        this.checkTimer =
+            new Timer(_ => this.RetrieveLastReport(), null, TimeSpan.FromSeconds(2), TimeSpan.FromMinutes(5));
     }
 
     private void OnLogout(object? sender, EventArgs e)
@@ -168,11 +171,26 @@ internal class BonusLightManager : IDisposable
 
     private void OnLastReportResponse(string content)
     {
-        var report = JsonConvert.DeserializeObject<Report>(content);
-        if (this.ReportStillActive(report) && BonusLightDuty.TryGetValue(report.TerritoryId, out var territoryLight))
+        var reports = JsonConvert.DeserializeObject<List<Report>>(content);
+        if (reports == null || reports.Count == 0)
+            return;
+
+        var listUpdated = new List<string> { "New light bonus detected" };
+        foreach (Report report in reports)
         {
-            var message = $"Light bonus detected on \"{territoryLight?.DutyName}\"";
-            this.UpdateLightBonus(report.TerritoryId, report.Date, message);
+            if (this.ReportStillActive(report) &&
+                BonusLightDuty.TryGetValue(report.TerritoryId, out var duty) &&
+                !LightConfiguration.ActiveBonus.Contains(report.TerritoryId))
+            {
+                LightConfiguration.ActiveBonus.Add(report.TerritoryId);
+                listUpdated.Add($" {duty!.DutyName}"); // This '' is an arrow in game
+            }
+        }
+
+        if (listUpdated.Count > 1)
+        {
+            Service.Configuration.Save();
+            this.NotifyLightBonus(listUpdated.ToArray());
         }
     }
 
@@ -190,19 +208,26 @@ internal class BonusLightManager : IDisposable
     {
         Task.Run(async () =>
         {
-            var response = this.httpClient.Send(request);
-            var content = await response.Content.ReadAsStringAsync();
-            PluginLog.Verbose($"{request.RequestUri} => [{response.StatusCode:D}] {content}");
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                if (response.StatusCode != HttpStatusCode.NotFound)
+                var response = this.httpClient.Send(request);
+                var content = await response.Content.ReadAsStringAsync();
+
+                this.LastRequestIsSuccess = response.IsSuccessStatusCode;
+                if (!response.IsSuccessStatusCode)
+                {
                     PluginLog.Warning($"{request.RequestUri} => [{response.StatusCode:D}] {content}");
+                    return;
+                }
 
-                return;
+                PluginLog.Verbose($"{request.RequestUri} => [{response.StatusCode:D}] {content}");
+                successCallback?.Invoke(content);
             }
-
-            successCallback?.Invoke(content);
+            catch (HttpRequestException e)
+            {
+                PluginLog.Error($"{request.RequestUri} => {e}");
+                this.LastRequestIsSuccess = false;
+            }
         });
     }
 
