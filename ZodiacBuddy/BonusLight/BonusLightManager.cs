@@ -70,6 +70,11 @@ internal class BonusLightManager : IDisposable
     /// <param name="message">Message to display.</param>
     public void AddLightBonus(uint territoryId, string message)
     {
+        if (LightConfiguration.ActiveBonus.Contains(territoryId))
+        {
+            return;
+        }
+
         LightConfiguration.ActiveBonus.Add(territoryId);
         Service.Configuration.Save();
 
