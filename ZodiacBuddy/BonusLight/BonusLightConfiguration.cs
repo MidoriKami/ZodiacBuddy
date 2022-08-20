@@ -17,6 +17,12 @@ public class BonusLightConfiguration
     public List<uint> ActiveBonus { get; } = new();
 
     /// <summary>
+    /// Gets the list of Territory Id of duty with bonus of light on the previous 2 hours.
+    /// </summary>
+    [JsonIgnore]
+    public List<uint> PreviousBonus { get; } = new();
+
+    /// <summary>
     /// Gets or sets a value indicating whether to display the current duty with light bonus on the Novus information window.
     /// </summary>
     public bool DisplayBonusDuty { get; set; } = true;

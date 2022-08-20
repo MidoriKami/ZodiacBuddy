@@ -76,13 +76,13 @@ internal class BonusLightManager : IDisposable
     /// <param name="message">Message to display.</param>
     public void AddLightBonus(uint territoryId, string message)
     {
-        if (LightConfiguration.ActiveBonus.Contains(territoryId))
+        if (LightConfiguration.ActiveBonus.Contains(territoryId) ||
+            LightConfiguration.PreviousBonus.Contains(territoryId))
         {
             return;
         }
 
         LightConfiguration.ActiveBonus.Add(territoryId);
-        Service.Configuration.Save();
 
         this.NotifyLightBonus(new[] { message });
         this.SendReport(territoryId);
@@ -147,8 +147,9 @@ internal class BonusLightManager : IDisposable
 
     private void ResetBonus()
     {
+        LightConfiguration.PreviousBonus.Clear();
+        LightConfiguration.PreviousBonus.AddRange(LightConfiguration.ActiveBonus);
         LightConfiguration.ActiveBonus.Clear();
-        Service.Configuration.Save();
     }
 
     /// <summary>
@@ -200,7 +201,6 @@ internal class BonusLightManager : IDisposable
 
         if (listUpdated.Count > 1)
         {
-            Service.Configuration.Save();
             this.NotifyLightBonus(listUpdated.ToArray());
         }
     }
