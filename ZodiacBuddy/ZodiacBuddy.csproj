@@ -55,7 +55,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <ProjectReference Include="..\lib\FFXIVClientStructs\FFXIVClientStructs\FFXIVClientStructs.csproj" />
     <Reference Include="FFXIVClientStructs" Private="False" />
     <Reference Include="Newtonsoft.Json" Private="False" />
     <Reference Include="Dalamud" Private="False" />

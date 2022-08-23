@@ -9,13 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
-		lib\FFXIVClientStructs\ida\data.yml = lib\FFXIVClientStructs\ida\data.yml
 		README.md = README.md
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FFXIVClientStructs", "lib\FFXIVClientStructs\FFXIVClientStructs\FFXIVClientStructs.csproj", "{4F775691-7B2F-4D03-868C-C8C6C377E763}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FFXIVClientStructs.Generators", "lib\FFXIVClientStructs\FFXIVClientStructs.Generators\FFXIVClientStructs.Generators.csproj", "{1E78B343-76FD-48BD-A2AF-542C9288BEE6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Github Actions", "Github Actions", "{CF562AC1-32CB-4F80-B105-3190A4E6C9CF}"
 	ProjectSection(SolutionItems) = preProject
@@ -32,14 +27,6 @@ Global
 		{1058E384-DE81-4830-8EE6-209E4E1E3CB9}.Debug|x64.Build.0 = Debug|x64
 		{1058E384-DE81-4830-8EE6-209E4E1E3CB9}.Release|x64.ActiveCfg = Release|x64
 		{1058E384-DE81-4830-8EE6-209E4E1E3CB9}.Release|x64.Build.0 = Release|x64
-		{4F775691-7B2F-4D03-868C-C8C6C377E763}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{4F775691-7B2F-4D03-868C-C8C6C377E763}.Debug|x64.Build.0 = Debug|Any CPU
-		{4F775691-7B2F-4D03-868C-C8C6C377E763}.Release|x64.ActiveCfg = Release|Any CPU
-		{4F775691-7B2F-4D03-868C-C8C6C377E763}.Release|x64.Build.0 = Release|Any CPU
-		{1E78B343-76FD-48BD-A2AF-542C9288BEE6}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{1E78B343-76FD-48BD-A2AF-542C9288BEE6}.Debug|x64.Build.0 = Debug|Any CPU
-		{1E78B343-76FD-48BD-A2AF-542C9288BEE6}.Release|x64.ActiveCfg = Release|Any CPU
-		{1E78B343-76FD-48BD-A2AF-542C9288BEE6}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
