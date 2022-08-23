@@ -16,3 +16,5 @@ jobs:
       with: 
         token: ${{ secrets.PAT }}
         plugin_name: ZodiacBuddy
+        project_path: ZodiacBuddy
+        plugin_owners: daemitus
