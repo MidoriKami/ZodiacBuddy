@@ -49,7 +49,6 @@
 
   <ItemGroup>
     <PackageReference Include="DalamudPackager" Version="2.1.6" />
-    <PackageReference Include="ILRepack" Version="2.0.18" GeneratePathProperty="true" />
     <PackageReference Include="LitJWT" Version="2.0.1" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.333">
       <PrivateAssets>all</PrivateAssets>
