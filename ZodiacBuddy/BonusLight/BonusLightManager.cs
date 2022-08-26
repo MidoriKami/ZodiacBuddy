@@ -31,7 +31,13 @@ internal class BonusLightManager : IDisposable
     /// </summary>
     public BonusLightManager()
     {
-        this.encoder = new JwtEncoder(new HS256Algorithm(Encoding.UTF8.GetBytes(Secrets.JwtSecret)));
+        // Congrats, you found the secret key.
+        var algoKey = Encoding.UTF8.GetBytes(
+            "BE11C9E53416BB9B9FB99B33C" +
+            "5B8AF0FA6A55CABB3F33774E3" +
+            "437AE83BF4E8DB");
+
+        this.encoder = new JwtEncoder(new HS256Algorithm(algoKey));
         this.httpClient = new HttpClient();
 
         var timeOfDay = DateTime.UtcNow.TimeOfDay;
