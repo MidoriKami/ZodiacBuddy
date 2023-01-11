@@ -3,14 +3,14 @@
   <PropertyGroup>
     <Authors>daemitus</Authors>
     <Company>-</Company>
-    <Version>0.0.3.10</Version>
+    <Version>0.1.0.0</Version>
     <Description>Complete your Zodiac relic with style.</Description>
     <Copyright></Copyright>
     <PackageProjectUrl>https://github.com/daemitus/ZodiacBuddy</PackageProjectUrl>
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <Platforms>x64</Platforms>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
@@ -48,8 +48,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="2.1.8" />
-    <PackageReference Include="LitJWT" Version="2.0.1" />
+    <PackageReference Include="DalamudPackager" Version="2.1.10" />
+    <PackageReference Include="LitJWT" Version="2.0.2" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.435">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
