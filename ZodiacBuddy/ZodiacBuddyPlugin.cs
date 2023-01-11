@@ -32,7 +32,7 @@ namespace ZodiacBuddy
         {
             pluginInterface.Create<Service>();
 
-            FFXIVClientStructs.Resolver.Initialize();
+            FFXIVClientStructs.Interop.Resolver.GetInstance.Resolve();
 
             Service.Plugin = this;
             Service.Configuration = pluginInterface.GetPluginConfig() as PluginConfiguration ?? new PluginConfiguration();
