@@ -1,8 +1,6 @@
 ﻿using System;
 
 using Dalamud.Game;
-using Dalamud.Game.Gui.Toast;
-using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Hooking;
 using Dalamud.Logging;
 using Dalamud.Utility.Signatures;
@@ -50,11 +48,10 @@ internal class BraveManager : IDisposable
 
     private static BraveConfiguration Configuration => Service.Configuration.Brave;
 
-    private static BonusLightConfiguration LightConfiguration => Service.Configuration.BonusLight;
-
     /// <inheritdoc/>
     public void Dispose()
     {
+        Service.Framework.Update -= this.OnUpdate;
         Service.Interface.UiBuilder.Draw -= this.window.Draw;
 
         this.addonRelicMagiciteOnSetupHook?.Disable();

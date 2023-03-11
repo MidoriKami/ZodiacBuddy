@@ -73,26 +73,30 @@ internal class BonusLightManager : IDisposable
     /// Update the bonus light configuration and play any notifications required.
     /// </summary>
     /// <param name="territoryId">Territory ID.</param>
+    /// <param name="detectionTime">DateTime of the detection.</param>
     /// <param name="message">Message to display.</param>
-    public void AddLightBonus(uint territoryId, string message)
+    public void AddLightBonus(uint territoryId, DateTime detectionTime, string message)
     {
-        if (LightConfiguration.ActiveBonus.Contains(territoryId) ||
-            LightConfiguration.PreviousBonus.Contains(territoryId))
-        {
+        if (LightConfiguration.ActiveBonus.Contains(territoryId))
             return;
-        }
+
+        this.NotifyLightBonus(new[] { message });
+
+        // Don't report/add past bonus (Still have bonus message)
+        if (!this.ReportStillActive(detectionTime))
+            return;
 
         LightConfiguration.ActiveBonus.Add(territoryId);
 
-        this.NotifyLightBonus(new[] { message });
-        this.SendReport(territoryId);
+        this.SendReport(territoryId, detectionTime);
     }
 
     /// <summary>
     /// Send a new bonus light event to the server.
     /// </summary>
     /// <param name="territoryId">Id of the duty with the light bonus.</param>
-    private void SendReport(uint territoryId)
+    /// <param name="detectionTime">DateTime of the detection.</param>
+    private void SendReport(uint territoryId, DateTime detectionTime)
     {
         if (Service.ClientState.LocalPlayer == null)
             return;
@@ -103,7 +107,7 @@ internal class BonusLightManager : IDisposable
         var datacenter = Service.ClientState.LocalPlayer.HomeWorld.GameData.DataCenter.Row;
         var world = Service.ClientState.LocalPlayer.HomeWorld.Id;
 
-        var report = new Report(datacenter, world, territoryId, DateTime.UtcNow);
+        var report = new Report(datacenter, world, territoryId, detectionTime);
         var content = JsonConvert.SerializeObject(report);
 
         var request = new HttpRequestMessage(HttpMethod.Post, $"{BaseUri}/reports/");
@@ -147,8 +151,6 @@ internal class BonusLightManager : IDisposable
 
     private void ResetBonus()
     {
-        LightConfiguration.PreviousBonus.Clear();
-        LightConfiguration.PreviousBonus.AddRange(LightConfiguration.ActiveBonus);
         LightConfiguration.ActiveBonus.Clear();
     }
 
@@ -190,7 +192,7 @@ internal class BonusLightManager : IDisposable
         var listUpdated = new List<string> { "New light bonus detected" };
         foreach (Report report in reports)
         {
-            if (this.ReportStillActive(report) &&
+            if (this.ReportStillActive(report.Date) &&
                 BonusLightDuty.TryGetValue(report.TerritoryId, out var duty) &&
                 !LightConfiguration.ActiveBonus.Contains(report.TerritoryId))
             {
@@ -205,14 +207,14 @@ internal class BonusLightManager : IDisposable
         }
     }
 
-    private bool ReportStillActive(Report report)
+    private bool ReportStillActive(DateTime reportDateTime)
     {
         var timeOfDay = DateTime.UtcNow.TimeOfDay;
         var lastEvenHour = timeOfDay.Hours % 2 == 0
             ? TimeSpan.FromHours(timeOfDay.Hours)
             : TimeSpan.FromHours(timeOfDay.Hours - 1);
         var deltaSinceLastEvenHour = timeOfDay - lastEvenHour;
-        return report.Date >= DateTime.UtcNow.Subtract(deltaSinceLastEvenHour);
+        return reportDateTime >= DateTime.UtcNow.Subtract(deltaSinceLastEvenHour);
     }
 
     private void Send(HttpRequestMessage request, Action<string>? successCallback)
