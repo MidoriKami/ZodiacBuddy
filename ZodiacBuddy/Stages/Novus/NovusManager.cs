@@ -1,6 +1,7 @@
 ﻿using System;
 
 using Dalamud.Game;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Gui.Toast;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Hooking;
@@ -32,6 +33,10 @@ internal class NovusManager : IDisposable
     private readonly Hook<AddonRelicGlassOnSetupDelegate> addonRelicGlassOnSetupHook = null!;
     private readonly NovusWindow window;
 
+    private DateTime dutyBeginning;
+    private BonusLightDuty? dutyEntered;
+    private ushort dutyIdEntered;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="NovusManager"/> class.
     /// </summary>
@@ -42,7 +47,9 @@ internal class NovusManager : IDisposable
         Service.Framework.Update += this.OnUpdate;
         Service.Toasts.QuestToast += this.OnToast;
         Service.Interface.UiBuilder.Draw += this.window.Draw;
+        Service.ClientState.TerritoryChanged += this.OnTerritoryChange;
 
+        this.OnTerritoryChange(null, Service.ClientState.TerritoryType);
         SignatureHelper.Initialise(this);
         this.addonRelicGlassOnSetupHook?.Enable();
     }
@@ -51,15 +58,22 @@ internal class NovusManager : IDisposable
 
     private static NovusConfiguration Configuration => Service.Configuration.Novus;
 
-    private static BonusLightConfiguration LightConfiguration => Service.Configuration.BonusLight;
-
     /// <inheritdoc/>
     public void Dispose()
     {
+        Service.Framework.Update -= this.OnUpdate;
         Service.Interface.UiBuilder.Draw -= this.window.Draw;
         Service.Toasts.QuestToast -= this.OnToast;
+        Service.ClientState.TerritoryChanged -= this.OnTerritoryChange;
 
         this.addonRelicGlassOnSetupHook?.Disable();
+    }
+
+    private static bool IsInDuty()
+    {
+        return Service.Condition[ConditionFlag.BoundByDuty] ||
+               Service.Condition[ConditionFlag.BoundByDuty56] ||
+               Service.Condition[ConditionFlag.BoundByDuty95];
     }
 
     private void AddonRelicGlassOnSetupDetour(IntPtr addonRelicGlass, uint a2, IntPtr a3)
@@ -173,14 +187,31 @@ internal class NovusManager : IDisposable
 
             Service.Plugin.PrintMessage($"Light Intensity has increased by {lightLevel.Intensity}.");
 
-            var territoryId = Service.ClientState.TerritoryType;
-            if (!BonusLightDuty.TryGetValue(territoryId, out var territoryLight))
+            var territoryId = this.dutyIdEntered;
+            var detectionDateTime = this.dutyBeginning;
+            var territoryLight = this.dutyEntered;
+
+            // Check territory didn't changed
+            if (territoryId != Service.ClientState.TerritoryType)
                 return;
 
-            if (lightLevel.Intensity > territoryLight!.DefaultLightIntensity)
-            {
-                Service.BonusLightManager.AddLightBonus(territoryId, $"Light bonus detected on \"{territoryLight.DutyName}\"");
-            }
+            if (territoryLight == null || lightLevel.Intensity == territoryLight.DefaultLightIntensity)
+                return;
+
+            Service.BonusLightManager.AddLightBonus(territoryId, detectionDateTime, $"Light bonus detected on \"{territoryLight.DutyName}\"");
+            return;
         }
+    }
+
+    private void OnTerritoryChange(object? sender, ushort territoryId)
+    {
+        if (!IsInDuty()) return;
+
+        if (!BonusLightDuty.TryGetValue(territoryId, out var territoryLight))
+            return;
+
+        this.dutyBeginning = DateTime.UtcNow;
+        this.dutyEntered = territoryLight;
+        this.dutyIdEntered = territoryId;
     }
 }
