@@ -227,7 +227,7 @@ internal struct BraveBook
             379 => new MapLinkPayload( 146,  23, 21.9f, 18.7f), // tempered orator         // Southern Thanalan
             380 => new MapLinkPayload( 156,  25, 29.6f, 14.3f), // gigas bonze             // Mor Dhona
             381 => new MapLinkPayload( 180,  30, 23.9f,  7.7f), // U'Ghamaro roundsman     // Outer La Noscea
-            382 => new MapLinkPayload( 152,   5, 24.2f, 17.0f), // sylph bonnet            // East Shroud
+            382 => new MapLinkPayload( 152,   5, 25.7f, 13.3f), // sylph bonnet            // East Shroud
             383 => new MapLinkPayload( 138,  18, 13.4f, 16.9f), // shelfclaw Reaver        // Western La Noscea
             384 => new MapLinkPayload( 146,  23, 26.1f, 21.1f), // Zahar'ak fortune-teller // Southern Thanalan
             385 => new MapLinkPayload( 137,  17, 29.5f, 20.8f), // 2nd Cohort laquearius   // Eastern La Noscea
