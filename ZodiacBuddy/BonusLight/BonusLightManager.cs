@@ -75,7 +75,7 @@ internal class BonusLightManager : IDisposable
     /// <param name="territoryId">Territory ID.</param>
     /// <param name="detectionTime">DateTime of the detection.</param>
     /// <param name="message">Message to display.</param>
-    public void AddLightBonus(uint territoryId, DateTime detectionTime, string message)
+    public void AddLightBonus(uint territoryId, DateTime? detectionTime, string message)
     {
         if (LightConfiguration.ActiveBonus.Contains(territoryId))
             return;
@@ -83,12 +83,12 @@ internal class BonusLightManager : IDisposable
         this.NotifyLightBonus(new[] { message });
 
         // Don't report/add past bonus (Still have bonus message)
-        if (!this.ReportStillActive(detectionTime))
+        if (detectionTime == null || !this.ReportStillActive((DateTime)detectionTime))
             return;
 
         LightConfiguration.ActiveBonus.Add(territoryId);
 
-        this.SendReport(territoryId, detectionTime);
+        this.SendReport(territoryId, (DateTime)detectionTime);
     }
 
     /// <summary>
@@ -252,6 +252,7 @@ internal class BonusLightManager : IDisposable
             { "aud", "ZodiacBuddy" },
             { "iss", "ZodiacBuddyDB" },
             { "iat", DateTimeOffset.UtcNow.ToUnixTimeSeconds() },
+            { "version", 2 }, // message version to compare with the server
         };
 
         return this.encoder.Encode(payload, TimeSpan.FromMinutes(15));
