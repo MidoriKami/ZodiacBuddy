@@ -5,6 +5,7 @@ using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.JobGauge;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.Command;
+using Dalamud.Game.DutyState;
 using Dalamud.Game.Gui;
 using Dalamud.Game.Gui.Toast;
 using Dalamud.IoC;
@@ -50,6 +51,12 @@ namespace ZodiacBuddy
         /// </summary>
         [PluginService]
         internal static ClientState ClientState { get; private set; } = null!;
+
+        /// <summary>
+        /// Gets the Dalamud duty state.
+        /// </summary>
+        [PluginService]
+        internal static DutyState DutyState { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud command manager.

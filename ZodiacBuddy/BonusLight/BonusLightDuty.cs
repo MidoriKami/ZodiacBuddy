@@ -75,7 +75,7 @@ public class BonusLightDuty
         {  350, new( 350, 48) }, // Haukke Manor (Hard)
         {  363, new( 363, 48) }, // the Lost City of Amdapor
         {  360, new( 360, 48) }, // Halatali (Hard)
-        {  362, new( 362, 48) }, // Brayflox's Longstop (Hard)
+        {  362, new( 362, 32) }, // Brayflox's Longstop (Hard)
         {  361, new( 361, 48) }, // Hullbreaker Isle
         {  373, new( 373, 48) }, // the Tam–Tara Deepcroft (Hard)
         {  365, new( 365, 48) }, // the Stone Vigil (Hard)
