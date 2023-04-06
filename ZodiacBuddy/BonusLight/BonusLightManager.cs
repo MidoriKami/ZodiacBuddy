@@ -74,16 +74,24 @@ internal class BonusLightManager : IDisposable
     /// </summary>
     /// <param name="territoryId">Territory ID.</param>
     /// <param name="detectionTime">DateTime of the detection.</param>
+    /// <param name="onDutyFromBeginning">Define if the player has join an ongoing duty or has reconnected.</param>
     /// <param name="message">Message to display.</param>
-    public void AddLightBonus(uint territoryId, DateTime? detectionTime, string message)
+    public void AddLightBonus(uint territoryId, DateTime? detectionTime, bool onDutyFromBeginning, string message)
     {
         if (LightConfiguration.ActiveBonus.Contains(territoryId))
             return;
 
         this.NotifyLightBonus(new[] { message });
 
-        // Don't report/add past bonus (Still have bonus message)
-        if (detectionTime == null || !this.ReportStillActive((DateTime)detectionTime))
+        // Don't report/add incomplete duty
+        if (!onDutyFromBeginning || detectionTime == null)
+            return;
+
+        // Don't report/add past bonus
+        // Remove 5s to ignore the 5 first second of a new window
+        // (Reduce false positive due to networking/loading)
+        var reportTime = ((DateTime)detectionTime).AddSeconds(-5);
+        if (!this.ReportStillActive(reportTime))
             return;
 
         LightConfiguration.ActiveBonus.Add(territoryId);
@@ -252,7 +260,7 @@ internal class BonusLightManager : IDisposable
             { "aud", "ZodiacBuddy" },
             { "iss", "ZodiacBuddyDB" },
             { "iat", DateTimeOffset.UtcNow.ToUnixTimeSeconds() },
-            { "version", 2 }, // message version to compare with the server
+            { "version", 3 }, // message version to compare with the server
         };
 
         return this.encoder.Encode(payload, TimeSpan.FromMinutes(15));
