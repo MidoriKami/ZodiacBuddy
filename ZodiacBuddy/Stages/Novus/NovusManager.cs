@@ -1,5 +1,4 @@
 ﻿using System;
-
 using Dalamud.Game;
 using Dalamud.Game.Gui.Toast;
 using Dalamud.Game.Text.SeStringHandling;
@@ -33,6 +32,7 @@ internal class NovusManager : IDisposable
     private readonly NovusWindow window;
 
     private DateTime? dutyBeginning;
+    private bool onDutyFromBeginning;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NovusManager"/> class.
@@ -185,7 +185,7 @@ internal class NovusManager : IDisposable
             if (territoryLight == null || lightLevel.Intensity <= territoryLight.DefaultLightIntensity)
                 return;
 
-            Service.BonusLightManager.AddLightBonus(territoryId, this.dutyBeginning, $"Light bonus detected on \"{territoryLight.DutyName}\"");
+            Service.BonusLightManager.AddLightBonus(territoryId, this.dutyBeginning, this.onDutyFromBeginning, $"Light bonus detected on \"{territoryLight.DutyName}\"");
             return;
         }
     }
@@ -194,13 +194,18 @@ internal class NovusManager : IDisposable
     {
         // Reset territory info
         this.dutyBeginning = null;
-    }
+        this.onDutyFromBeginning = false;
 
-    private void OnDutyStart(object? sender, ushort territoryId)
-    {
         if (!BonusLightDuty.TryGetValue(territoryId, out _))
             return;
 
         this.dutyBeginning = DateTime.UtcNow;
+    }
+
+    private void OnDutyStart(object? sender, ushort territoryId)
+    {
+        // Prevent report from player reconnecting during duty or joining an ongoing duty
+        // Can set dutyBeginning due to player in cinematic
+        this.onDutyFromBeginning = true;
     }
 }
