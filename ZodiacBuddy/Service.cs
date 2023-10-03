@@ -10,6 +10,7 @@ using Dalamud.Game.Gui;
 using Dalamud.Game.Gui.Toast;
 using Dalamud.IoC;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ZodiacBuddy.BonusLight;
 
 namespace ZodiacBuddy
@@ -44,66 +45,78 @@ namespace ZodiacBuddy
         /// Gets the Dalamud chat gui.
         /// </summary>
         [PluginService]
-        internal static ChatGui ChatGui { get; private set; } = null!;
+        internal static IChatGui ChatGui { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud client state.
         /// </summary>
         [PluginService]
-        internal static ClientState ClientState { get; private set; } = null!;
+        internal static IClientState ClientState { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud duty state.
         /// </summary>
         [PluginService]
-        internal static DutyState DutyState { get; private set; } = null!;
+        internal static IDutyState DutyState { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud command manager.
         /// </summary>
         [PluginService]
-        internal static CommandManager CommandManager { get; private set; } = null!;
+        internal static ICommandManager CommandManager { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud condition.
         /// </summary>
         [PluginService]
-        internal static Condition Condition { get; private set; } = null!;
+        internal static ICondition Condition { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud data manager.
         /// </summary>
         [PluginService]
-        internal static DataManager DataManager { get; private set; } = null!;
+        internal static IDataManager DataManager { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud framework manager.
         /// </summary>
         [PluginService]
-        internal static Framework Framework { get; private set; } = null!;
+        internal static IFramework Framework { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud game gui.
         /// </summary>
         [PluginService]
-        internal static GameGui GameGui { get; private set; } = null!;
+        internal static IGameGui GameGui { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud job gauges.
         /// </summary>
         [PluginService]
-        internal static JobGauges JobGauges { get; private set; } = null!;
+        internal static IJobGauges JobGauges { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud target manager.
         /// </summary>
         [PluginService]
-        internal static TargetManager TargetManager { get; private set; } = null!;
+        internal static ITargetManager TargetManager { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Dalamud toast manager.
         /// </summary>
         [PluginService]
-        internal static ToastGui Toasts { get; private set; } = null!;
+        internal static IToastGui Toasts { get; private set; } = null!;
+
+        /// <summary>
+        /// Gets the Dalamud Hooker.
+        /// </summary>
+        [PluginService]
+        internal static IGameInteropProvider Hooker { get; private set; } = null!;
+
+        /// <summary>
+        /// Gets the Plugin Log.
+        /// </summary>
+        [PluginService]
+        internal static IPluginLog PluginLog { get; private set; } = null!;
     }
 }

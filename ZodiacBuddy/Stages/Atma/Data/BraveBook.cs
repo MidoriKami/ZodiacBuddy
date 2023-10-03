@@ -75,7 +75,7 @@ internal struct BraveBook
                 var fateCount = bookRow.Fate.Length;
                 var leveCount = bookRow.Leve.Length;
 
-                // PluginLog.Debug($"Loading book {bookID}: {bookName}");
+                // Service.PluginLog.Debug($"Loading book {bookID}: {bookName}");
                 var braveBook = Dataset[bookRow.RowId] = new BraveBook()
                 {
                     Name = bookName,
@@ -100,7 +100,7 @@ internal struct BraveBook
 
                     var position = GetMonsterPosition(mntc.RowId);
 
-                    // PluginLog.Debug($"Loaded enemy {mntcID}: {name}");
+                    // Service.PluginLog.Debug($"Loaded enemy {mntcID}: {name}");
                     braveBook.Enemies[i] = new BraveTarget()
                     {
                         Name = name,
@@ -128,7 +128,7 @@ internal struct BraveBook
 
                     var cfcID = position.TerritoryType.ContentFinderCondition.Value!.RowId;
 
-                    // PluginLog.Debug($"Loaded dungeon {mntcID}: {name}");
+                    // Service.PluginLog.Debug($"Loaded dungeon {mntcID}: {name}");
                     braveBook.Dungeons[i] = new BraveTarget()
                     {
                         Name = name,
@@ -152,7 +152,7 @@ internal struct BraveBook
 
                     var name = fate.Name;
 
-                    // PluginLog.Debug($"Loaded fate {fateID}: {name}");
+                    // Service.PluginLog.Debug($"Loaded fate {fateID}: {name}");
                     braveBook.Fates[i] = new BraveTarget()
                     {
                         Name = name,
@@ -176,7 +176,7 @@ internal struct BraveBook
                     var zoneName = position.TerritoryType.PlaceName.Value!.Name.ToString();
                     var zoneID = position.TerritoryType.RowId;
 
-                    // PluginLog.Debug($"Loaded leve {leveID}: {name}");
+                    // Service.PluginLog.Debug($"Loaded leve {leveID}: {name}");
                     braveBook.Leves[i] = new BraveTarget()
                     {
                         Name = leveName,
@@ -191,7 +191,7 @@ internal struct BraveBook
         }
         catch (Exception ex)
         {
-            PluginLog.Error(ex, "An error occurred during plugin data load.");
+            Service.PluginLog.Error(ex, "An error occurred during plugin data load.");
             throw;
         }
     }

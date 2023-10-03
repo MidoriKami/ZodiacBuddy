@@ -54,9 +54,6 @@ namespace ZodiacBuddy
         }
 
         /// <inheritdoc/>
-        public string Name => "Zodiac Buddy";
-
-        /// <inheritdoc/>
         public void Dispose()
         {
             Service.CommandManager.RemoveHandler(Command);
@@ -78,11 +75,11 @@ namespace ZodiacBuddy
         {
             var sb = new SeStringBuilder()
                 .AddUiForeground(45)
-                .AddText($"[{Service.Plugin.Name}] ")
+                .AddText("[ZodiacBuddy] ")
                 .AddUiForegroundOff()
                 .Append(message);
 
-            Service.ChatGui.PrintChat(new XivChatEntry()
+            Service.ChatGui.Print(new XivChatEntry
             {
                 Type = Service.Configuration.ChatType,
                 Message = sb.BuiltString,
@@ -95,7 +92,7 @@ namespace ZodiacBuddy
         /// <param name="message">Message to send.</param>
         public void PrintError(string message)
         {
-            Service.ChatGui.PrintError($"[{this.Name}] {message}");
+            Service.ChatGui.PrintError($"[ZodiacBuddy] {message}");
         }
 
         private void OnOpenConfigUi()

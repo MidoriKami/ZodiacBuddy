@@ -34,7 +34,7 @@ internal partial class AtmaManager : IDisposable
     /// </summary>
     public AtmaManager()
     {
-        SignatureHelper.Initialise(this);
+        Service.Hooker.InitializeFromAttributes(this);
         this.receiveEventHook.Enable();
     }
 
@@ -79,7 +79,7 @@ internal partial class AtmaManager : IDisposable
             var mapMarker = mapMarkers.FirstOrDefault(m => m.DataType == 3 && m.DataKey == aetheryte.RowId);
             if (mapMarker == default)
             {
-                // PluginLog.Debug($"Could not find aetheryte: {name}");
+                // Service.PluginLog.Debug($"Could not find aetheryte: {name}");
                 return 0;
             }
 
@@ -87,7 +87,7 @@ internal partial class AtmaManager : IDisposable
             var aetherY = ConvertRawPositionToMapCoordinate(mapMarker.Y, scale);
 
             // var aetheryteName = aetheryte.PlaceName.Value!;
-            // PluginLog.Debug($"Aetheryte found: {aetherName} ({aetherX} ,{aetherY})");
+            // Service.PluginLog.Debug($"Aetheryte found: {aetherName} ({aetherX} ,{aetherY})");
             var distance = Math.Pow(aetherX - mapLink.XCoord, 2) + Math.Pow(aetherY - mapLink.YCoord, 2);
             if (distance < closestDistance)
             {
@@ -108,7 +108,7 @@ internal partial class AtmaManager : IDisposable
         if (telepo == null)
         {
             Service.Plugin.PrintError("Something horrible happened, please contact the developer.");
-            PluginLog.Error("Could not teleport: Telepo is missing.");
+            Service.PluginLog.Error("Could not teleport: Telepo is missing.");
             return false;
         }
 
@@ -147,7 +147,7 @@ internal partial class AtmaManager : IDisposable
         }
         catch (Exception ex)
         {
-            PluginLog.Error(ex, "Exception during hook: AddonRelicNotebook.ReceiveEvent:Click");
+            Service.PluginLog.Error(ex, "Exception during hook: AddonRelicNotebook.ReceiveEvent:Click");
         }
     }
 
@@ -200,7 +200,7 @@ internal partial class AtmaManager : IDisposable
             ? $"{selectedTarget.LocationName}, {selectedTarget.ZoneName}"
             : selectedTarget.ZoneName;
 
-        // PluginLog.Debug($"Target selected: {selectedTarget.Name} in {zoneName}.");
+        // Service.PluginLog.Debug($"Target selected: {selectedTarget.Name} in {zoneName}.");
         if (Service.Configuration.BraveEchoTarget)
         {
             var sb = new SeStringBuilder()
@@ -227,7 +227,7 @@ internal partial class AtmaManager : IDisposable
             }
             else
             {
-                PluginLog.Warning($"Could not find an aetheryte for {zoneName}");
+                Service.PluginLog.Warning($"Could not find an aetheryte for {zoneName}");
             }
         }
         else

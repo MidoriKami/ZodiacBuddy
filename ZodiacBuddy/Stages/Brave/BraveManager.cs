@@ -3,6 +3,7 @@
 using Dalamud.Game;
 using Dalamud.Hooking;
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using ZodiacBuddy.BonusLight;
@@ -40,7 +41,7 @@ internal class BraveManager : IDisposable
         Service.Framework.Update += this.OnUpdate;
         Service.Interface.UiBuilder.Draw += this.window.Draw;
 
-        SignatureHelper.Initialise(this);
+        Service.Hooker.InitializeFromAttributes(this);
         this.addonRelicMagiciteOnSetupHook?.Enable();
     }
 
@@ -68,7 +69,7 @@ internal class BraveManager : IDisposable
         }
         catch (Exception ex)
         {
-            PluginLog.Error(ex, $"Unhandled error during {nameof(BraveManager)}.{nameof(this.AddonRelicMagiciteOnSetupDetour)}");
+            Service.PluginLog.Error(ex, $"Unhandled error during {nameof(BraveManager)}.{nameof(this.AddonRelicMagiciteOnSetupDetour)}");
         }
     }
 
@@ -114,7 +115,7 @@ internal class BraveManager : IDisposable
         analyzeText->SetText(lightText->NodeText.ToString());
     }
 
-    private void OnUpdate(Framework framework)
+    private void OnUpdate(IFramework framework)
     {
         try
         {
@@ -122,7 +123,7 @@ internal class BraveManager : IDisposable
         }
         catch (Exception ex)
         {
-            PluginLog.Error(ex, $"Unhandled error during {nameof(BraveManager)}.{nameof(this.OnUpdate)}");
+            Service.PluginLog.Error(ex, $"Unhandled error during {nameof(BraveManager)}.{nameof(this.OnUpdate)}");
         }
     }
 

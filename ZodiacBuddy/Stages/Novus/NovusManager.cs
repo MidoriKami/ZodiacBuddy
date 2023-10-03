@@ -1,9 +1,9 @@
 ﻿using System;
-using Dalamud.Game;
+
 using Dalamud.Game.Gui.Toast;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Hooking;
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using ZodiacBuddy.BonusLight;
@@ -47,7 +47,7 @@ internal class NovusManager : IDisposable
         Service.ClientState.TerritoryChanged += this.OnTerritoryChange;
         Service.DutyState.DutyStarted += this.OnDutyStart;
 
-        SignatureHelper.Initialise(this);
+        Service.Hooker.InitializeFromAttributes(this);
         this.addonRelicGlassOnSetupHook?.Enable();
     }
 
@@ -78,7 +78,7 @@ internal class NovusManager : IDisposable
         }
         catch (Exception ex)
         {
-            PluginLog.Error(ex, $"Unhandled error during {nameof(NovusManager)}.{nameof(this.AddonRelicGlassOnSetupDetour)}");
+            Service.PluginLog.Error(ex, $"Unhandled error during {nameof(NovusManager)}.{nameof(this.AddonRelicGlassOnSetupDetour)}");
         }
     }
 
@@ -116,7 +116,7 @@ internal class NovusManager : IDisposable
         analyzeText->SetText(lightText->NodeText.ToString());
     }
 
-    private void OnUpdate(Framework framework)
+    private void OnUpdate(IFramework framework)
     {
         try
         {
@@ -124,7 +124,7 @@ internal class NovusManager : IDisposable
         }
         catch (Exception ex)
         {
-            PluginLog.Error(ex, $"Unhandled error during {nameof(NovusManager)}.{nameof(this.OnUpdate)}");
+            Service.PluginLog.Error(ex, $"Unhandled error during {nameof(NovusManager)}.{nameof(this.OnUpdate)}");
         }
     }
 
@@ -156,7 +156,7 @@ internal class NovusManager : IDisposable
         }
         catch (Exception ex)
         {
-            PluginLog.Error(ex, $"Unhandled error during {nameof(NovusManager)}.{nameof(this.OnToast)}");
+            Service.PluginLog.Error(ex, $"Unhandled error during {nameof(NovusManager)}.{nameof(this.OnToast)}");
         }
     }
 
@@ -190,7 +190,7 @@ internal class NovusManager : IDisposable
         }
     }
 
-    private void OnTerritoryChange(object? sender, ushort territoryId)
+    private void OnTerritoryChange(ushort territoryId)
     {
         // Reset territory info
         this.dutyBeginning = null;

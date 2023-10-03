@@ -48,7 +48,7 @@ internal class BonusLightManager : IDisposable
 
         Service.ClientState.Login += this.OnLogin;
         Service.ClientState.Logout += this.OnLogout;
-        if (Service.ClientState.LocalPlayer is not null) this.OnLogin(null, null!);
+        if (Service.ClientState.LocalPlayer is not null) this.OnLogin();
         this.resetTimer = new Timer(_ => this.ResetBonus(), null, delta, TimeSpan.FromHours(2));
     }
 
@@ -178,14 +178,14 @@ internal class BonusLightManager : IDisposable
         this.Send(request, this.OnLastReportResponse);
     }
 
-    private void OnLogin(object? sender, EventArgs e)
+    private void OnLogin()
     {
         this.checkTimer?.Dispose();
         this.checkTimer =
             new Timer(_ => this.RetrieveLastReport(), null, TimeSpan.FromSeconds(2), TimeSpan.FromMinutes(5));
     }
 
-    private void OnLogout(object? sender, EventArgs e)
+    private void OnLogout()
     {
         this.checkTimer?.Dispose();
         this.ResetBonus();
@@ -237,16 +237,16 @@ internal class BonusLightManager : IDisposable
                 this.LastRequestIsSuccess = response.IsSuccessStatusCode;
                 if (!response.IsSuccessStatusCode)
                 {
-                    PluginLog.Warning($"{request.RequestUri} => [{response.StatusCode:D}] {content}");
+                    Service.PluginLog.Warning($"{request.RequestUri} => [{response.StatusCode:D}] {content}");
                     return;
                 }
 
-                PluginLog.Verbose($"{request.RequestUri} => [{response.StatusCode:D}] {content}");
+                Service.PluginLog.Verbose($"{request.RequestUri} => [{response.StatusCode:D}] {content}");
                 successCallback?.Invoke(content);
             }
             catch (HttpRequestException e)
             {
-                PluginLog.Error($"{request.RequestUri} => {e}");
+                Service.PluginLog.Error($"{request.RequestUri} => {e}");
                 this.LastRequestIsSuccess = false;
             }
         });
