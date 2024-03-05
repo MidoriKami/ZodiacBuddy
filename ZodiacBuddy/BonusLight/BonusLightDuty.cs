@@ -18,7 +18,7 @@ public class BonusLightDuty
         {  292, new( 292, 16) }, // the Bowl of Embers (Hard)
         {  294, new( 294, 16) }, // the Howling Eye (Hard)
         {  293, new( 293, 16) }, // the Navel (Hard)
-        {  207, new( 207, 16) }, // Thornmarch (Hard)
+        { 1067, new(1067, 16) }, // Thornmarch (Hard)
         {  281, new( 281, 16) }, // the Whorleater (Hard)
         {  374, new( 374, 16) }, // the Striking Tree (Hard)
         {  377, new( 377, 16) }, // the Akh Afah Amphitheatre (Hard)
@@ -79,10 +79,10 @@ public class BonusLightDuty
         {  361, new( 361, 48) }, // Hullbreaker Isle
         {  373, new( 373, 48) }, // the Tam–Tara Deepcroft (Hard)
         {  365, new( 365, 48) }, // the Stone Vigil (Hard)
-        {  371, new( 371, 48) }, // Snowcloak
+        { 1062, new(1062, 48) }, // Snowcloak
         {  387, new( 387, 48) }, // Sastasha (Hard)
         {  367, new( 367, 48) }, // the Sunken Temple of Qarn (Hard)
-        {  150, new( 150, 48) }, // the Keeper of the Lake
+        { 1063, new(1063, 48) }, // the Keeper of the Lake
         {  188, new( 188, 48) }, // the Wanderer's Palace (Hard)
         {  189, new( 189, 48) }, // Amdapor Keep (Hard)
 
@@ -104,7 +104,7 @@ public class BonusLightDuty
             .GetRow(territoryId)!
             .ContentFinderCondition.Value!.Name
             .ToDalamudString()
-            .ToString()!;
+            .ToString();
     }
 
     /// <summary>
@@ -133,4 +133,10 @@ public class BonusLightDuty
     /// <returns>True if the duty was found, otherwise false.</returns>
     public static bool TryGetValue(uint territoryID, out BonusLightDuty? duty)
         => Dataset.TryGetValue(territoryID, out duty);
+
+    /// <summary>
+    /// Gets BonusLightDuty list.
+    /// </summary>
+    /// <returns>Dataset of the BonusLightDuty.</returns>
+    public static Dictionary<uint, BonusLightDuty> GetDataset() => Dataset;
 }
