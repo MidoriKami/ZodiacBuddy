@@ -125,17 +125,12 @@ internal partial class AtmaManager : IDisposable
         return false;
     }
 
-    private unsafe bool ShowDutyFinder(uint cfcID)
+    private unsafe bool ShowDutyFinder(uint cfcId)
     {
-        if (cfcID == 0)
+        if (cfcId == 0)
             return false;
 
-        var framework = Framework.Instance();
-        var uiModule = framework->GetUiModule();
-        var agentModule = uiModule->GetAgentModule();
-        var cfAgent = (IntPtr)agentModule->GetAgentByInternalId(AgentId.ContentsFinder);
-
-        this.openDuty(cfAgent, cfcID, 0);
+        AgentContentsFinder.Instance()->OpenRegularDuty(cfcId);
         return true;
     }
 
@@ -157,7 +152,7 @@ internal partial class AtmaManager : IDisposable
         if (relicNote == null)
             return;
 
-        var bookID = relicNote->RelicNoteID;
+        var bookID = relicNote->RelicNoteId;
 
         var addonPtr = (AddonRelicNoteBook*)addon;
         var index = addonPtr->CategoryList->SelectedItemIndex;

@@ -28,10 +28,10 @@ public static class BraveRelic
         { 9501, GetItemName(9501) }, // Sasuke's Blades
     };
 
-    private static string GetItemName(uint itemId)
+    private static string GetItemName(uint ItemId)
     {
         return Service.DataManager.Excel.GetSheet<Item>()!
-            .GetRow(itemId)!.Name
+            .GetRow(ItemId)!.Name
             .ToDalamudString()
             .ToString();
     }

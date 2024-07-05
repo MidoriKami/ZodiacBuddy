@@ -28,10 +28,10 @@ public static class NovusRelic
         { 9253, GetItemName(9253) }, // Yoshimitsu Novus
     };
 
-    private static string GetItemName(uint itemId)
+    private static string GetItemName(uint ItemId)
     {
         return Service.DataManager.Excel.GetSheet<Item>()!
-            .GetRow(itemId)!.Name
+            .GetRow(ItemId)!.Name
             .ToDalamudString()
             .ToString();
     }

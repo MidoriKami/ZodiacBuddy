@@ -28,7 +28,7 @@ namespace ZodiacBuddy
         /// Initializes a new instance of the <see cref="ZodiacBuddyPlugin"/> class.
         /// </summary>
         /// <param name="pluginInterface">Dalamud plugin interface.</param>
-        public ZodiacBuddyPlugin(DalamudPluginInterface pluginInterface)
+        public ZodiacBuddyPlugin(IDalamudPluginInterface pluginInterface)
         {
             pluginInterface.Create<Service>();
 

@@ -1,25 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Dalamud.NET.Sdk/9.0.2">
   <PropertyGroup>
     <Authors>daemitus</Authors>
     <Company>-</Company>
-    <Version>0.2.0.0</Version>
+    <Version>1.0.0.0</Version>
     <Description>Complete your Zodiac relic with style.</Description>
     <PackageProjectUrl>https://github.com/daemitus/ZodiacBuddy</PackageProjectUrl>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <TargetFramework>net7.0-windows</TargetFramework>
-    <Platforms>x64</Platforms>
-    <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>bin\$(Configuration)\</OutputPath>
-    <NoWarn>CS1591</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Label="Documentation">
@@ -29,34 +14,16 @@
   <ItemGroup>
     <Content Include="..\images\icon.png" Link="images\icon.png" CopyToOutputDirectory="PreserveNewest" Visible="false" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <AssemblySearchPaths>
-      $(AssemblySearchPaths);
-      $(DalamudLibPath);
-    </AssemblySearchPaths>
-  </PropertyGroup>
   
   <ItemGroup>
     <AdditionalFiles Include="..\stylecop.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="2.1.12" />
     <PackageReference Include="LitJWT" Version="2.0.2" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.435">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <Reference Include="FFXIVClientStructs" Private="False" />
-    <Reference Include="Newtonsoft.Json" Private="False" />
-    <Reference Include="Dalamud" Private="False" />
-    <Reference Include="ImGui.NET" Private="False" />
-    <Reference Include="Lumina" Private="False" />
-    <Reference Include="Lumina.Excel" Private="False" />
   </ItemGroup>
 </Project>

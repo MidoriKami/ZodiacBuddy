@@ -22,7 +22,7 @@ public class NovusWindow : InformationWindow.InformationWindow
     /// <inheritdoc/>
     protected override void DisplayRelicInfo(InventoryItem item)
     {
-        if (!NovusRelic.Items.TryGetValue(item.ItemID, out var name))
+        if (!NovusRelic.Items.TryGetValue(item.ItemId, out var name))
             return;
 
         name = name

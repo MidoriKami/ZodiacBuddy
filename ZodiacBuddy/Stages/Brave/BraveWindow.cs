@@ -22,7 +22,7 @@ public class BraveWindow : InformationWindow.InformationWindow
     /// <inheritdoc/>
     protected override void DisplayRelicInfo(InventoryItem item)
     {
-        if (!BraveRelic.Items.TryGetValue(item.ItemID, out var name))
+        if (!BraveRelic.Items.TryGetValue(item.ItemId, out var name))
             return;
 
         name = name
