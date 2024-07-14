@@ -3,8 +3,7 @@
 /// <summary>
 /// Configuration class for Zodiac Brave relic.
 /// </summary>
-public class BraveConfiguration
-{
+public class BraveConfiguration {
     /// <summary>
     /// Gets or sets a value indicating whether to display the information about the equipped relic.
     /// </summary>

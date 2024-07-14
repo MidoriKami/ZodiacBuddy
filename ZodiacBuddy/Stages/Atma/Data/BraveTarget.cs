@@ -1,13 +1,11 @@
-﻿using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
+﻿using Dalamud.Game.Text.SeStringHandling.Payloads;
 
 namespace ZodiacBuddy.Stages.Atma.Data;
 
 /// <summary>
 /// A single target for a Trial of the Braves book.
 /// </summary>
-internal struct BraveTarget
-{
+internal struct BraveTarget {
     /// <summary>
     /// Gets the display name.
     /// </summary>
@@ -26,12 +24,12 @@ internal struct BraveTarget
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    public uint ZoneID { get; init; }
+    public uint ZoneId { get; init; }
 
     /// <summary>
     /// Gets the contents finder condition ID.
     /// </summary>
-    public uint ContentsFinderConditionID { get; init; }
+    public uint ContentsFinderConditionId { get; init; }
 
     /// <summary>
     /// Gets the location name.

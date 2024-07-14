@@ -7,21 +7,11 @@ namespace ZodiacBuddy.Stages.Brave;
 /// <summary>
 /// Brave information window.
 /// </summary>
-public class BraveWindow : InformationWindow.InformationWindow
-{
-    /// <summary>
-    /// Initializes a new instance of the <see cref="BraveWindow"/> class.
-    /// </summary>
-    public BraveWindow()
-        : base("Zodiac Brave Information")
-    {
-    }
-
+public class BraveWindow() : InformationWindow.InformationWindow("Zodiac Brave Information") {
     private static InformationWindowConfiguration InfoWindowConfiguration => Service.Configuration.InformationWindow;
 
     /// <inheritdoc/>
-    protected override void DisplayRelicInfo(InventoryItem item)
-    {
+    protected override void DisplayRelicInfo(InventoryItem item) {
         if (!BraveRelic.Items.TryGetValue(item.ItemId, out var name))
             return;
 
@@ -37,14 +27,14 @@ public class BraveWindow : InformationWindow.InformationWindow
             mahatmaValue = 0;
 
         var mahatmaProgress = mahatmaValue / 12f;
-        ImGui.ProgressBar(mahatmaProgress, this.DetermineProgressSize(name), $"{mahatmaValue}/12");
+        ImGui.ProgressBar(mahatmaProgress, DetermineProgressSize(name), $"{mahatmaValue}/12");
 
         var value = item.Spiritbond % 500;
         if (value == 1)
             value -= 1;
 
         var progress = value / 80f;
-        ImGui.ProgressBar(progress, this.DetermineProgressSize(name), $"{value / 2}/40");
+        ImGui.ProgressBar(progress, DetermineProgressSize(name), $"{value / 2}/40");
 
         ImGui.PopStyleColor();
     }

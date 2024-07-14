@@ -12,31 +12,29 @@ namespace ZodiacBuddy.InformationWindow;
 /// <summary>
 /// Default information window.
 /// </summary>
-public abstract class InformationWindow
-{
+public abstract class InformationWindow {
     /// <summary>
     /// Initializes a new instance of the <see cref="InformationWindow"/> class.
     /// </summary>
     /// <param name="name">Name of the window.</param>
-    protected InformationWindow(string name)
-    {
+    protected InformationWindow(string name) {
         this.Name = name;
     }
 
     /// <summary>
     /// Gets or sets a value indicating whether to show this window.
     /// </summary>
-    public bool ShowWindow { get; set; } = false;
+    public bool ShowWindow { get; set; }
 
     /// <summary>
     /// Gets or sets the mainhand item.
     /// </summary>
-    public InventoryItem MainhandItem { get; set; } = default;
+    public InventoryItem MainHandItem { get; set; }
 
     /// <summary>
     /// Gets or sets the offhand item.
     /// </summary>
-    public InventoryItem OffhandItem { get; set; } = default;
+    public InventoryItem OffhandItem { get; set; }
 
     private static BonusLightConfiguration BonusConfiguration => Service.Configuration.BonusLight;
 
@@ -50,8 +48,7 @@ public abstract class InformationWindow
     /// <summary>
     /// Draw information window.
     /// </summary>
-    public void Draw()
-    {
+    public void Draw() {
         if (!this.ShowWindow)
             return;
 
@@ -63,14 +60,12 @@ public abstract class InformationWindow
             ? ImGuiWindowFlags.NoInputs
             : ImGuiWindowFlags.None;
 
-        if (ImGui.Begin(this.Name, flags))
-        {
-            this.DisplayRelicInfo(this.MainhandItem);
+        if (ImGui.Begin(this.Name, flags)) {
+            this.DisplayRelicInfo(this.MainHandItem);
             this.DisplayRelicInfo(this.OffhandItem);
             this.DisplayBonusLight();
 
-            if (!InfoWindowConfiguration.ManualSize)
-            {
+            if (!InfoWindowConfiguration.ManualSize) {
                 ImGui.SetWindowSize(this.Name, Vector2.Zero);
             }
         }
@@ -89,14 +84,12 @@ public abstract class InformationWindow
     /// </summary>
     /// <param name="relicName">Name of the relic.</param>
     /// <returns>Vector2 of the determined size.</returns>
-    protected Vector2 DetermineProgressSize(string relicName)
-    {
+    protected static Vector2 DetermineProgressSize(string relicName) {
         if (!InfoWindowConfiguration.ProgressAutoSize)
             return Vector2.Zero with { X = InfoWindowConfiguration.ProgressSize };
 
         if (InfoWindowConfiguration.ManualSize ||
-            (BonusConfiguration.DisplayBonusDuty &&
-             BonusConfiguration.ActiveBonus.Count > 0))
+            BonusConfiguration is { DisplayBonusDuty: true, ActiveBonus.Count: > 0 })
             return Vector2.Zero with { X = ImGui.GetContentRegionAvail().X - 1 };
 
         var vector = ImGui.CalcTextSize(relicName) with { Y = 0f };
@@ -106,13 +99,11 @@ public abstract class InformationWindow
             vector;
     }
 
-    private void DisplayBonusLight()
-    {
+    private void DisplayBonusLight() {
         if (!BonusConfiguration.DisplayBonusDuty)
             return;
 
-        if (BonusConfiguration.ActiveBonus.Count > 0)
-        {
+        if (BonusConfiguration.ActiveBonus.Count > 0) {
             ImGui.PushFont(UiBuilder.IconFont);
             ImGui.TextColored(ImGuiColors.DalamudYellow, FontAwesomeIcon.Lightbulb.ToIconString());
             ImGui.PopFont();
@@ -126,8 +117,7 @@ public abstract class InformationWindow
             ImGui.SameLine();
             ImGui.Text($"{startWindowDate} - {endWindowDate}");
 
-            foreach (var territoryId in BonusConfiguration.ActiveBonus)
-            {
+            foreach (var territoryId in BonusConfiguration.ActiveBonus) {
                 var dutyName = BonusLightDuty.GetValue(territoryId).DutyName
                     .Replace("Œ", "Oe")
                     .Replace("œ", "oe");

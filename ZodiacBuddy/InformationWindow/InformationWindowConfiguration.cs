@@ -5,13 +5,11 @@ namespace ZodiacBuddy.InformationWindow;
 /// <summary>
 /// Configuration class for weapons information window.
 /// </summary>
-public class InformationWindowConfiguration
-{
+public class InformationWindowConfiguration {
     /// <summary>
     /// Default color for the bonus light information progress bar.
     /// </summary>
-    [NonSerialized]
-    private static readonly uint DefaultProgressColor = 0xFF943463;
+    [NonSerialized] private const uint DefaultProgressColor = 0xFF943463;
 
     /// <summary>
     /// Gets or sets a value indicating whether to enable manual resizing of the weapons information window.
@@ -42,7 +40,5 @@ public class InformationWindowConfiguration
     /// Reset ProgressColor to it's default value.
     /// </summary>
     public void ResetProgressColor()
-    {
-        this.ProgressColor = DefaultProgressColor;
-    }
+        => this.ProgressColor = DefaultProgressColor;
 }

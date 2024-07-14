@@ -3,8 +3,7 @@
 /// <summary>
 /// Configuration class for Nexus relic.
 /// </summary>
-public class NovusConfiguration
-{
+public class NovusConfiguration {
     /// <summary>
     /// Gets or sets a value indicating whether to display the information about equipped relics.
     /// </summary>

@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Linq;
-using System.Runtime.InteropServices;
-
+using Dalamud.Game.Addon.Lifecycle;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.Hooking;
-using Dalamud.Logging;
-using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
@@ -21,40 +17,24 @@ namespace ZodiacBuddy.Stages.Atma;
 /// <summary>
 /// Your buddy for the Atma enhancement stage.
 /// </summary>
-internal partial class AtmaManager : IDisposable
-{
-    [Signature("48 89 74 24 ?? 57 48 83 EC 20 8D 42 FD 49 8B F0 48 8B F9 83 F8 09 77 2D", DetourName = nameof(ReceiveEventDetour))]
-    private readonly Hook<ReceiveEventDelegate> receiveEventHook = null!; // AddonRelicNotebook.ReceiveEvent:Click
-
-    [Signature("48 89 6C 24 ?? 48 89 74 24 ?? 57 48 81 EC ?? ?? ?? ?? 48 8B F9 41 0F B6 E8")]
-    private readonly OpenDutyDelegate openDuty = null!;
-
+internal class AtmaManager : IDisposable {
     /// <summary>
     /// Initializes a new instance of the <see cref="AtmaManager"/> class.
     /// </summary>
-    public AtmaManager()
-    {
-        Service.Hooker.InitializeFromAttributes(this);
-        this.receiveEventHook.Enable();
+    public AtmaManager() {
+        Service.AddonLifecycle.RegisterListener(AddonEvent.PostReceiveEvent, "RelicNoteBook", ReceiveEventDetour);
     }
-
-    private delegate void ReceiveEventDelegate(IntPtr addon, uint which, IntPtr eventData, IntPtr inputData);
-
-    private delegate IntPtr OpenDutyDelegate(IntPtr agent, uint contentFinderCondition, byte a3);
 
     /// <inheritdoc/>
-    public void Dispose()
-    {
-        this.receiveEventHook?.Dispose();
+    public void Dispose() {
+        Service.AddonLifecycle.UnregisterListener(ReceiveEventDetour);
     }
 
-    private static uint GetNearestAetheryte(MapLinkPayload mapLink)
-    {
-        var closestAetheryteID = 0u;
+    private static uint GetNearestAetheryte(MapLinkPayload mapLink) {
+        var closestAetheryteId = 0u;
         var closestDistance = double.MaxValue;
 
-        static float ConvertRawPositionToMapCoordinate(int pos, float scale)
-        {
+        static float ConvertRawPositionToMapCoordinate(int pos, float scale) {
             var c = scale / 100.0f;
             var scaledPos = pos * c / 1000.0f;
 
@@ -64,8 +44,7 @@ internal partial class AtmaManager : IDisposable
         var aetherytes = Service.DataManager.GetExcelSheet<Sheets.Aetheryte>()!;
         var mapMarkers = Service.DataManager.GetExcelSheet<Sheets.MapMarker>()!;
 
-        foreach (var aetheryte in aetherytes)
-        {
+        foreach (var aetheryte in aetherytes) {
             if (!aetheryte.IsAetheryte)
                 continue;
 
@@ -77,9 +56,8 @@ internal partial class AtmaManager : IDisposable
             var name = map.PlaceName.Value!.Name.ToString();
 
             var mapMarker = mapMarkers.FirstOrDefault(m => m.DataType == 3 && m.DataKey == aetheryte.RowId);
-            if (mapMarker == default)
-            {
-                // Service.PluginLog.Debug($"Could not find aetheryte: {name}");
+            if (mapMarker == default) {
+                Service.PluginLog.Debug($"Could not find aetheryte: {name}");
                 return 0;
             }
 
@@ -92,103 +70,81 @@ internal partial class AtmaManager : IDisposable
             if (distance < closestDistance)
             {
                 closestDistance = distance;
-                closestAetheryteID = aetheryte.RowId;
+                closestAetheryteId = aetheryte.RowId;
             }
         }
 
-        return closestAetheryteID;
+        return closestAetheryteId;
     }
 
-    private unsafe bool Teleport(uint aetheryteID)
-    {
-        if (Service.ClientState.LocalPlayer == null)
-            return false;
+    private unsafe void Teleport(uint aetheryteId) {
+        if (Service.ClientState.LocalPlayer == null) return;
 
         var telepo = Telepo.Instance();
-        if (telepo == null)
-        {
-            Service.Plugin.PrintError("Something horrible happened, please contact the developer.");
+        if (telepo == null) {
+            ZodiacBuddyPlugin.PrintError("Something horrible happened, please contact the developer.");
             Service.PluginLog.Error("Could not teleport: Telepo is missing.");
-            return false;
+            return;
         }
 
-        if (telepo->TeleportList.Size() == 0)
+        if (telepo->TeleportList.Count == 0)
             telepo->UpdateAetheryteList();
 
-        foreach (var aetheryte in telepo->TeleportList.Span)
-        {
-            if (aetheryte.AetheryteId == aetheryteID)
-                return telepo->Teleport(aetheryteID, 0);
+        foreach (var aetheryte in telepo->TeleportList) {
+            if (aetheryte.AetheryteId == aetheryteId) {
+                telepo->Teleport(aetheryteId, 0);
+                return;
+            }
         }
 
-        Service.Plugin.PrintError("Could not teleport, not attuned.");
-        return false;
+        ZodiacBuddyPlugin.PrintError("Could not teleport, not attuned.");
     }
 
-    private unsafe bool ShowDutyFinder(uint cfcId)
-    {
-        if (cfcId == 0)
-            return false;
-
-        AgentContentsFinder.Instance()->OpenRegularDuty(cfcId);
-        return true;
-    }
-
-    private unsafe void ReceiveEventDetour(IntPtr addon, uint which, IntPtr eventData, IntPtr inputData)
-    {
-        try
-        {
-            this.ReceiveEvent(addon, eventData);
+    private unsafe void ReceiveEventDetour(AddonEvent type, AddonArgs args) {
+        try {
+            if (args is AddonReceiveEventArgs receiveEventArgs && (AtkEventType)receiveEventArgs.AtkEventType is AtkEventType.ButtonClick) {
+                this.ReceiveEvent((AddonRelicNoteBook*)receiveEventArgs.Addon, (AtkEvent*)receiveEventArgs.AtkEvent);
+            }
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             Service.PluginLog.Error(ex, "Exception during hook: AddonRelicNotebook.ReceiveEvent:Click");
         }
     }
 
-    private unsafe void ReceiveEvent(IntPtr addon, IntPtr eventData)
-    {
+    private unsafe void ReceiveEvent(AddonRelicNoteBook* addon, AtkEvent* eventData) {
         var relicNote = RelicNote.Instance();
         if (relicNote == null)
             return;
 
-        var bookID = relicNote->RelicNoteId;
+        var bookId = relicNote->RelicNoteId;
+        var index = addon->CategoryList->SelectedItemIndex;
+        var targetComponent = eventData->Target;
 
-        var addonPtr = (AddonRelicNoteBook*)addon;
-        var index = addonPtr->CategoryList->SelectedItemIndex;
-
-        var eventDataPtr = (EventData*)eventData;
-        var targetComponent = eventDataPtr->Target;
-
-        unsafe static bool IsOwnerNode(IntPtr target, AtkComponentCheckBox* checkbox)
-            => target == new IntPtr(checkbox->AtkComponentButton.AtkComponentBase.OwnerNode);
-
-        var selectedTarget = targetComponent switch
-        {
+        var selectedTarget = targetComponent switch {
             // Enemies
-            IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy0.CheckBox) => BraveBook.GetValue(bookID).Enemies[0],
-            IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy1.CheckBox) => BraveBook.GetValue(bookID).Enemies[1],
-            IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy2.CheckBox) => BraveBook.GetValue(bookID).Enemies[2],
-            IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy3.CheckBox) => BraveBook.GetValue(bookID).Enemies[3],
-            IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy4.CheckBox) => BraveBook.GetValue(bookID).Enemies[4],
-            IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy5.CheckBox) => BraveBook.GetValue(bookID).Enemies[5],
-            IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy6.CheckBox) => BraveBook.GetValue(bookID).Enemies[6],
-            IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy7.CheckBox) => BraveBook.GetValue(bookID).Enemies[7],
-            IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy8.CheckBox) => BraveBook.GetValue(bookID).Enemies[8],
-            IntPtr t when index == 0 && IsOwnerNode(t, addonPtr->Enemy9.CheckBox) => BraveBook.GetValue(bookID).Enemies[9],
+            _ when index == 0 && IsOwnerNode(targetComponent, addon->Enemy0.CheckBox) => BraveBook.GetValue(bookId).Enemies[0],
+            _ when index == 0 && IsOwnerNode(targetComponent, addon->Enemy1.CheckBox) => BraveBook.GetValue(bookId).Enemies[1],
+            _ when index == 0 && IsOwnerNode(targetComponent, addon->Enemy2.CheckBox) => BraveBook.GetValue(bookId).Enemies[2],
+            _ when index == 0 && IsOwnerNode(targetComponent, addon->Enemy3.CheckBox) => BraveBook.GetValue(bookId).Enemies[3],
+            _ when index == 0 && IsOwnerNode(targetComponent, addon->Enemy4.CheckBox) => BraveBook.GetValue(bookId).Enemies[4],
+            _ when index == 0 && IsOwnerNode(targetComponent, addon->Enemy5.CheckBox) => BraveBook.GetValue(bookId).Enemies[5],
+            _ when index == 0 && IsOwnerNode(targetComponent, addon->Enemy6.CheckBox) => BraveBook.GetValue(bookId).Enemies[6],
+            _ when index == 0 && IsOwnerNode(targetComponent, addon->Enemy7.CheckBox) => BraveBook.GetValue(bookId).Enemies[7],
+            _ when index == 0 && IsOwnerNode(targetComponent, addon->Enemy8.CheckBox) => BraveBook.GetValue(bookId).Enemies[8],
+            _ when index == 0 && IsOwnerNode(targetComponent, addon->Enemy9.CheckBox) => BraveBook.GetValue(bookId).Enemies[9],
             // Dungeons
-            IntPtr t when index == 1 && IsOwnerNode(t, addonPtr->Dungeon0.CheckBox) => BraveBook.GetValue(bookID).Dungeons[0],
-            IntPtr t when index == 1 && IsOwnerNode(t, addonPtr->Dungeon1.CheckBox) => BraveBook.GetValue(bookID).Dungeons[1],
-            IntPtr t when index == 1 && IsOwnerNode(t, addonPtr->Dungeon2.CheckBox) => BraveBook.GetValue(bookID).Dungeons[2],
+            _ when index == 1 && IsOwnerNode(targetComponent, addon->Dungeon0.CheckBox) => BraveBook.GetValue(bookId).Dungeons[0],
+            _ when index == 1 && IsOwnerNode(targetComponent, addon->Dungeon1.CheckBox) => BraveBook.GetValue(bookId).Dungeons[1],
+            _ when index == 1 && IsOwnerNode(targetComponent, addon->Dungeon2.CheckBox) => BraveBook.GetValue(bookId).Dungeons[2],
             // FATEs
-            IntPtr t when index == 2 && IsOwnerNode(t, addonPtr->Fate0.CheckBox) => BraveBook.GetValue(bookID).Fates[0],
-            IntPtr t when index == 2 && IsOwnerNode(t, addonPtr->Fate1.CheckBox) => BraveBook.GetValue(bookID).Fates[1],
-            IntPtr t when index == 2 && IsOwnerNode(t, addonPtr->Fate2.CheckBox) => BraveBook.GetValue(bookID).Fates[2],
+            _ when index == 2 && IsOwnerNode(targetComponent, addon->Fate0.CheckBox) => BraveBook.GetValue(bookId).Fates[0],
+            _ when index == 2 && IsOwnerNode(targetComponent, addon->Fate1.CheckBox) => BraveBook.GetValue(bookId).Fates[1],
+            _ when index == 2 && IsOwnerNode(targetComponent, addon->Fate2.CheckBox) => BraveBook.GetValue(bookId).Fates[2],
             // Leves
-            IntPtr t when index == 3 && IsOwnerNode(t, addonPtr->Leve0.CheckBox) => BraveBook.GetValue(bookID).Leves[0],
-            IntPtr t when index == 3 && IsOwnerNode(t, addonPtr->Leve1.CheckBox) => BraveBook.GetValue(bookID).Leves[1],
-            IntPtr t when index == 3 && IsOwnerNode(t, addonPtr->Leve2.CheckBox) => BraveBook.GetValue(bookID).Leves[2],
-            _ => throw new ArgumentException($"Unexpected index and/or node: {index}, {targetComponent:X}"),
+            _ when index == 3 && IsOwnerNode(targetComponent, addon->Leve0.CheckBox) => BraveBook.GetValue(bookId).Leves[0],
+            _ when index == 3 && IsOwnerNode(targetComponent, addon->Leve1.CheckBox) => BraveBook.GetValue(bookId).Leves[1],
+            _ when index == 3 && IsOwnerNode(targetComponent, addon->Leve2.CheckBox) => BraveBook.GetValue(bookId).Leves[2],
+            _ => throw new ArgumentException($"Unexpected index and/or node: {index}, {(nint)targetComponent:X}"),
         };
 
         var zoneName = !string.IsNullOrEmpty(selectedTarget.LocationName)
@@ -213,32 +169,22 @@ internal partial class AtmaManager : IDisposable
         }
 
         var aetheryteId = GetNearestAetheryte(selectedTarget.Position);
-        if (aetheryteId == 0)
-        {
-            if (index == 1)
-            {
+        if (aetheryteId == 0) {
+            if (index == 1) {
                 // Dungeons
-                this.ShowDutyFinder(selectedTarget.ContentsFinderConditionID);
+                AgentContentsFinder.Instance()->OpenRegularDuty(selectedTarget.ContentsFinderConditionId);
             }
-            else
-            {
+            else {
                 Service.PluginLog.Warning($"Could not find an aetheryte for {zoneName}");
             }
         }
-        else
-        {
+        else {
             Service.GameGui.OpenMapWithMapLink(selectedTarget.Position);
             this.Teleport(aetheryteId);
         }
-    }
+        return;
 
-    [StructLayout(LayoutKind.Explicit)]
-    private struct EventData
-    {
-        [FieldOffset(0x8)]
-        public IntPtr Target;
-
-        [FieldOffset(0x10)]
-        public IntPtr Addon;
+        static bool IsOwnerNode(AtkEventTarget* target, AtkComponentCheckBox* checkbox)
+            => target == checkbox->AtkComponentButton.AtkComponentBase.OwnerNode;
     }
 }

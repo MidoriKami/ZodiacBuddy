@@ -8,99 +8,88 @@ using ZodiacBuddy.Stages.Atma;
 using ZodiacBuddy.Stages.Brave;
 using ZodiacBuddy.Stages.Novus;
 
-namespace ZodiacBuddy
-{
+namespace ZodiacBuddy;
+
+/// <summary>
+/// Main plugin implementation.
+/// </summary>
+public sealed class ZodiacBuddyPlugin : IDalamudPlugin {
+    private const string Command = "/pzodiac";
+
+    private readonly AtmaManager animusBuddy;
+    private readonly NovusManager novusManager;
+    private readonly BraveManager braveManager;
+
+    private readonly WindowSystem windowSystem;
+    private readonly ConfigWindow configWindow;
+
     /// <summary>
-    /// Main plugin implementation.
+    /// Initializes a new instance of the <see cref="ZodiacBuddyPlugin"/> class.
     /// </summary>
-    public sealed partial class ZodiacBuddyPlugin : IDalamudPlugin
-    {
-        private const string Command = "/pzodiac";
+    /// <param name="pluginInterface">Dalamud plugin interface.</param>
+    public ZodiacBuddyPlugin(IDalamudPluginInterface pluginInterface) {
+        pluginInterface.Create<Service>();
 
-        private readonly AtmaManager animusBuddy;
-        private readonly NovusManager novusManager;
-        private readonly BraveManager braveManager;
+        Service.Plugin = this;
+        Service.Configuration = pluginInterface.GetPluginConfig() as PluginConfiguration ?? new PluginConfiguration();
 
-        private readonly WindowSystem windowSystem;
-        private readonly ConfigWindow configWindow;
+        this.windowSystem = new WindowSystem("ZodiacBuddy");
+        this.windowSystem.AddWindow(this.configWindow = new ConfigWindow());
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ZodiacBuddyPlugin"/> class.
-        /// </summary>
-        /// <param name="pluginInterface">Dalamud plugin interface.</param>
-        public ZodiacBuddyPlugin(IDalamudPluginInterface pluginInterface)
-        {
-            pluginInterface.Create<Service>();
+        Service.Interface.UiBuilder.OpenConfigUi += this.OnOpenConfigUi;
+        Service.Interface.UiBuilder.Draw += this.windowSystem.Draw;
 
-            Service.Plugin = this;
-            Service.Configuration = pluginInterface.GetPluginConfig() as PluginConfiguration ?? new PluginConfiguration();
+        Service.CommandManager.AddHandler(Command, new CommandInfo(this.OnCommand) {
+            HelpMessage = "Open a window to edit various settings.",
+            ShowInHelp = true,
+        });
 
-            this.windowSystem = new("ZodiacBuddy");
-            this.windowSystem.AddWindow(this.configWindow = new());
-
-            Service.Interface.UiBuilder.OpenConfigUi += this.OnOpenConfigUi;
-            Service.Interface.UiBuilder.Draw += this.windowSystem.Draw;
-
-            Service.CommandManager.AddHandler(Command, new CommandInfo(this.OnCommand)
-            {
-                HelpMessage = "Open a window to edit various settings.",
-                ShowInHelp = true,
-            });
-
-            Service.BonusLightManager = new BonusLightManager();
-            this.animusBuddy = new AtmaManager();
-            this.novusManager = new NovusManager();
-            this.braveManager = new BraveManager();
-        }
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Service.CommandManager.RemoveHandler(Command);
-
-            Service.Interface.UiBuilder.Draw -= this.windowSystem.Draw;
-            Service.Interface.UiBuilder.OpenConfigUi -= this.OnOpenConfigUi;
-
-            this.animusBuddy?.Dispose();
-            this.novusManager?.Dispose();
-            this.braveManager?.Dispose();
-            Service.BonusLightManager?.Dispose();
-        }
-
-        /// <summary>
-        /// Print a message.
-        /// </summary>
-        /// <param name="message">Message to send.</param>
-        public void PrintMessage(SeString message)
-        {
-            var sb = new SeStringBuilder()
-                .AddUiForeground(45)
-                .AddText("[ZodiacBuddy] ")
-                .AddUiForegroundOff()
-                .Append(message);
-
-            Service.ChatGui.Print(new XivChatEntry
-            {
-                Type = Service.Configuration.ChatType,
-                Message = sb.BuiltString,
-            });
-        }
-
-        /// <summary>
-        /// Print an error message.
-        /// </summary>
-        /// <param name="message">Message to send.</param>
-        public void PrintError(string message)
-        {
-            Service.ChatGui.PrintError($"[ZodiacBuddy] {message}");
-        }
-
-        private void OnOpenConfigUi()
-            => this.configWindow.IsOpen = true;
-
-        private void OnCommand(string command, string arguments)
-        {
-            this.configWindow.IsOpen = true;
-        }
+        Service.BonusLightManager = new BonusLightManager();
+        this.animusBuddy = new AtmaManager();
+        this.novusManager = new NovusManager();
+        this.braveManager = new BraveManager();
     }
+
+    /// <inheritdoc/>
+    public void Dispose() {
+        Service.CommandManager.RemoveHandler(Command);
+
+        Service.Interface.UiBuilder.Draw -= this.windowSystem.Draw;
+        Service.Interface.UiBuilder.OpenConfigUi -= this.OnOpenConfigUi;
+
+        this.animusBuddy.Dispose();
+        this.novusManager.Dispose();
+        this.braveManager.Dispose();
+        Service.BonusLightManager.Dispose();
+    }
+
+    /// <summary>
+    /// Print a message.
+    /// </summary>
+    /// <param name="message">Message to send.</param>
+    public void PrintMessage(SeString message) {
+        var sb = new SeStringBuilder()
+            .AddUiForeground(45)
+            .AddText("[ZodiacBuddy] ")
+            .AddUiForegroundOff()
+            .Append(message);
+
+        Service.ChatGui.Print(new XivChatEntry {
+            Type = Service.Configuration.ChatType,
+            Message = sb.BuiltString,
+        });
+    }
+
+    /// <summary>
+    /// Print an error message.
+    /// </summary>
+    /// <param name="message">Message to send.</param>
+    public static void PrintError(string message)
+        => Service.ChatGui.PrintError($"[ZodiacBuddy] {message}");
+
+    private void OnOpenConfigUi()
+        => this.configWindow.IsOpen = true;
+
+    private void OnCommand(string command, string arguments)
+        => this.configWindow.IsOpen = true;
 }

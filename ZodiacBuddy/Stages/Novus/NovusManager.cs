@@ -1,10 +1,9 @@
 ﻿using System;
-
+using Dalamud.Game.Addon.Lifecycle;
+using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Game.Gui.Toast;
 using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
-using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using ZodiacBuddy.BonusLight;
 
@@ -13,10 +12,8 @@ namespace ZodiacBuddy.Stages.Novus;
 /// <summary>
 /// Your buddy for the Novus stage.
 /// </summary>
-internal class NovusManager : IDisposable
-{
-    private static readonly BonusLightLevel[] BonusLightValues =
-    {
+internal class NovusManager : IDisposable {
+    private static readonly BonusLightLevel[] BonusLightValues = {
         #pragma warning disable format,SA1008,SA1025
         new(  8, 4649), // Feeble
         new( 16, 4650), // Gentle
@@ -26,9 +23,7 @@ internal class NovusManager : IDisposable
         new(128, 4654), // Newborn Star
         #pragma warning restore format,SA1008,SA1025
     };
-
-    [Signature("40 56 48 83 EC 50 F3 0F 10 05", DetourName = nameof(AddonRelicGlassOnSetupDetour))]
-    private readonly Hook<AddonRelicGlassOnSetupDelegate> addonRelicGlassOnSetupHook = null!;
+    
     private readonly NovusWindow window;
 
     private DateTime? dutyBeginning;
@@ -37,8 +32,7 @@ internal class NovusManager : IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="NovusManager"/> class.
     /// </summary>
-    public NovusManager()
-    {
+    public NovusManager() {
         this.window = new NovusWindow();
 
         Service.Framework.Update += this.OnUpdate;
@@ -47,52 +41,37 @@ internal class NovusManager : IDisposable
         Service.ClientState.TerritoryChanged += this.OnTerritoryChange;
         Service.DutyState.DutyStarted += this.OnDutyStart;
 
-        Service.Hooker.InitializeFromAttributes(this);
-        this.addonRelicGlassOnSetupHook?.Enable();
+        Service.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "RelicGlass", AddonRelicGlassOnSetupDetour);
     }
-
-    private delegate void AddonRelicGlassOnSetupDelegate(IntPtr addon, uint a2, IntPtr a3);
 
     private static NovusConfiguration Configuration => Service.Configuration.Novus;
 
     /// <inheritdoc/>
-    public void Dispose()
-    {
+    public void Dispose() {
         Service.Framework.Update -= this.OnUpdate;
         Service.Interface.UiBuilder.Draw -= this.window.Draw;
         Service.Toasts.QuestToast -= this.OnToast;
         Service.ClientState.TerritoryChanged -= this.OnTerritoryChange;
         Service.DutyState.DutyStarted -= this.OnDutyStart;
 
-        this.addonRelicGlassOnSetupHook?.Disable();
+        Service.AddonLifecycle.UnregisterListener(AddonRelicGlassOnSetupDetour);
     }
 
-    private void AddonRelicGlassOnSetupDetour(IntPtr addonRelicGlass, uint a2, IntPtr a3)
-    {
-        this.addonRelicGlassOnSetupHook.Original(addonRelicGlass, a2, a3);
-
-        try
-        {
-            this.UpdateRelicGlassAddon(0, 4u);
-            this.UpdateRelicGlassAddon(1, 5u);
-        }
-        catch (Exception ex)
-        {
-            Service.PluginLog.Error(ex, $"Unhandled error during {nameof(NovusManager)}.{nameof(this.AddonRelicGlassOnSetupDetour)}");
-        }
+    private void AddonRelicGlassOnSetupDetour(AddonEvent type, AddonArgs args) {
+        this.UpdateRelicGlassAddon(0, 4u);
+        this.UpdateRelicGlassAddon(1, 5u);
     }
 
-    private unsafe void UpdateRelicGlassAddon(int slot, uint nodeID)
-    {
+    private unsafe void UpdateRelicGlassAddon(int slot, uint nodeId) {
         var item = Util.GetEquippedItem(slot);
         if (!NovusRelic.Items.ContainsKey(item.ItemId))
             return;
 
-        var addon = (AtkUnitBase*)Service.GameGui.GetAddonByName("RelicGlass", 1);
+        var addon = (AtkUnitBase*)Service.GameGui.GetAddonByName("RelicGlass");
         if (addon == null)
             return;
 
-        var componentNode = (AtkComponentNode*)addon->UldManager.SearchNodeById(nodeID);
+        var componentNode = (AtkComponentNode*)addon->UldManager.SearchNodeById(nodeId);
         if (componentNode == null)
             return;
 
@@ -100,8 +79,7 @@ internal class NovusManager : IDisposable
         if (lightText == null)
             return;
 
-        if (Configuration.ShowNumbersInRelicGlass)
-        {
+        if (Configuration.ShowNumbersInRelicGlass) {
             var value = item.Spiritbond;
             lightText->SetText($"{lightText->NodeText} {value}/2000");
         }
@@ -116,52 +94,39 @@ internal class NovusManager : IDisposable
         analyzeText->SetText(lightText->NodeText.ToString());
     }
 
-    private void OnUpdate(IFramework framework)
-    {
-        try
-        {
-            this.OnUpdateInner();
+    private void OnUpdate(IFramework framework) {
+        try {
+            if (!Configuration.DisplayRelicInfo) {
+                this.window.ShowWindow = false;
+                return;
+            }
+
+            var mainhand = Util.GetEquippedItem(0);
+            var offhand = Util.GetEquippedItem(1);
+
+            var shouldShowWindow =
+                NovusRelic.Items.ContainsKey(mainhand.ItemId) ||
+                NovusRelic.Items.ContainsKey(offhand.ItemId);
+
+            this.window.ShowWindow = shouldShowWindow;
+            this.window.MainHandItem = mainhand;
+            this.window.OffhandItem = offhand;
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             Service.PluginLog.Error(ex, $"Unhandled error during {nameof(NovusManager)}.{nameof(this.OnUpdate)}");
         }
     }
 
-    private void OnUpdateInner()
-    {
-        if (!Configuration.DisplayRelicInfo)
-        {
-            this.window.ShowWindow = false;
-            return;
-        }
-
-        var mainhand = Util.GetEquippedItem(0);
-        var offhand = Util.GetEquippedItem(1);
-
-        var shouldShowWindow =
-            NovusRelic.Items.ContainsKey(mainhand.ItemId) ||
-            NovusRelic.Items.ContainsKey(offhand.ItemId);
-
-        this.window.ShowWindow = shouldShowWindow;
-        this.window.MainhandItem = mainhand;
-        this.window.OffhandItem = offhand;
-    }
-
-    private void OnToast(ref SeString message, ref QuestToastOptions options, ref bool isHandled)
-    {
-        try
-        {
+    private void OnToast(ref SeString message, ref QuestToastOptions options, ref bool isHandled) {
+        try {
             this.OnToastInner(ref message, ref options, ref isHandled);
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             Service.PluginLog.Error(ex, $"Unhandled error during {nameof(NovusManager)}.{nameof(this.OnToast)}");
         }
     }
 
-    private void OnToastInner(ref SeString message, ref QuestToastOptions options, ref bool isHandled)
-    {
+    private void OnToastInner(ref SeString message, ref QuestToastOptions _, ref bool isHandled) {
         if (isHandled)
             return;
 
@@ -171,8 +136,7 @@ internal class NovusManager : IDisposable
             message.ToString().Contains(relicName))
             return;
 
-        foreach (var lightLevel in BonusLightValues)
-        {
+        foreach (var lightLevel in BonusLightValues) {
             if (!message.ToString().Contains(lightLevel.Message))
                 continue;
 
@@ -190,8 +154,7 @@ internal class NovusManager : IDisposable
         }
     }
 
-    private void OnTerritoryChange(ushort territoryId)
-    {
+    private void OnTerritoryChange(ushort territoryId) {
         // Reset territory info
         this.dutyBeginning = null;
         this.onDutyFromBeginning = false;
@@ -202,8 +165,7 @@ internal class NovusManager : IDisposable
         this.dutyBeginning = DateTime.UtcNow;
     }
 
-    private void OnDutyStart(object? sender, ushort territoryId)
-    {
+    private void OnDutyStart(object? sender, ushort territoryId) {
         // Prevent report from player reconnecting during duty or joining an ongoing duty
         // Can set dutyBeginning due to player in cinematic
         this.onDutyFromBeginning = true;

@@ -7,13 +7,11 @@ namespace ZodiacBuddy.BonusLight;
 /// <summary>
 /// Configuration class for Nexus relic.
 /// </summary>
-public class BonusLightConfiguration
-{
+public class BonusLightConfiguration {
     /// <summary>
     /// Gets the list of Territory Id of duty with bonus of light.
     /// </summary>
-    [JsonIgnore]
-    public List<uint> ActiveBonus { get; } = new();
+    [JsonIgnore] public List<uint> ActiveBonus { get; } = [];
 
     /// <summary>
     /// Gets or sets a value indicating whether to display the current duty with light bonus on the Novus information window.

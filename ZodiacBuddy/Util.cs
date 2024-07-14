@@ -7,15 +7,13 @@ namespace ZodiacBuddy;
 /// <summary>
 /// Utility methods.
 /// </summary>
-internal class Util
-{
+internal static class Util {
     /// <summary>
     /// Return the item equipped on the slot id.
     /// </summary>
     /// <param name="index">Slot index of the desired item.</param>
     /// <returns>Equipped item on the slot or the default item 0.</returns>
-    public static unsafe InventoryItem GetEquippedItem(int index)
-    {
+    public static unsafe InventoryItem GetEquippedItem(int index) {
         var im = InventoryManager.Instance();
         if (im == null)
             throw new Exception("InventoryManager was null");

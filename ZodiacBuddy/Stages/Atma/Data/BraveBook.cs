@@ -2,20 +2,17 @@
 using System.Collections.Generic;
 
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.Logging;
 
 namespace ZodiacBuddy.Stages.Atma.Data;
 
 /// <summary>
 /// A collection of targets for a single Trial of the Braves book.
 /// </summary>
-internal struct BraveBook
-{
+internal struct BraveBook {
     // key: RelicNote row ID
-    private static readonly Dictionary<uint, BraveBook> Dataset = new();
+    private static readonly Dictionary<uint, BraveBook> Dataset = [];
 
-    static BraveBook()
-    {
+    static BraveBook() {
         PopulateDataset();
     }
 
@@ -47,28 +44,25 @@ internal struct BraveBook
     /// <summary>
     /// Gets the value associated with the specified key.
     /// </summary>
-    /// <param name="bookID">RelicNote ID.</param>
+    /// <param name="bookId">RelicNote ID.</param>
     /// <returns>Brave book data.</returns>
-    public static BraveBook GetValue(uint bookID)
-        => Dataset[bookID];
+    public static BraveBook GetValue(uint bookId)
+        => Dataset[bookId];
 
     /// <summary>
     /// Populate all the available data about the Trial of the Braves.
     /// </summary>
-    private static void PopulateDataset()
-    {
-        try
-        {
+    private static void PopulateDataset() {
+        try {
             var relicNoteSheet = Service.DataManager.GetExcelSheet<Excel.RelicNote>()!;
 
-            foreach (var bookRow in relicNoteSheet)
-            {
+            foreach (var bookRow in relicNoteSheet) {
                 var eventItem = bookRow.EventItem.Value;
                 if (eventItem == null)
                     continue;
 
-                var bookID = bookRow.RowId;
-                var bookName = eventItem!.Name.ToString();
+                // var bookId = bookRow.RowId;
+                var bookName = eventItem.Name.ToString();
 
                 var enemyCount = bookRow.MonsterNoteTargetCommon.Length;
                 var dungeonCount = bookRow.MonsterNoteTargetNM.Length;
@@ -85,14 +79,13 @@ internal struct BraveBook
                     Leves = new BraveTarget[leveCount],
                 };
 
-                for (var i = 0; i < enemyCount; i++)
-                {
+                for (var i = 0; i < enemyCount; i++) {
                     var mntc = bookRow.MonsterNoteTargetCommon[i].MonsterNoteTargetCommon.Value!;
-                    var mntcID = mntc.RowId;
+                    // var mntcID = mntc.RowId;
 
                     var zoneRow = mntc.PlaceName[0].Zone.Value!;
                     var zoneName = zoneRow.Name.ToString();
-                    var zoneID = zoneRow.RowId;
+                    var zoneId = zoneRow.RowId;
 
                     var locationName = mntc.PlaceName[0].Location.Value!.Name.ToString();
 
@@ -105,20 +98,19 @@ internal struct BraveBook
                     {
                         Name = name,
                         ZoneName = zoneName,
-                        ZoneID = zoneID,
+                        ZoneId = zoneId,
                         LocationName = locationName,
                         Position = position,
                     };
                 }
 
-                for (var i = 0; i < dungeonCount; i++)
-                {
+                for (var i = 0; i < dungeonCount; i++) {
                     var mntc = bookRow.MonsterNoteTargetNM[i].Value!;
-                    var mntcID = mntc.RowId;
+                    // var mntcID = mntc.RowId;
 
                     var zoneRow = mntc.PlaceName[0].Zone.Value!;
                     var zoneName = zoneRow.Name.ToString();
-                    var zoneID = zoneRow.RowId;
+                    var zoneId = zoneRow.RowId;
 
                     var locationName = mntc.PlaceName[0].Location.Value!.Name.ToString();
 
@@ -126,80 +118,72 @@ internal struct BraveBook
 
                     var position = GetMonsterPosition(mntc.RowId);
 
-                    var cfcID = position.TerritoryType.ContentFinderCondition.Value!.RowId;
+                    var cfcId = position.TerritoryType.ContentFinderCondition.Value!.RowId;
 
                     // Service.PluginLog.Debug($"Loaded dungeon {mntcID}: {name}");
-                    braveBook.Dungeons[i] = new BraveTarget()
-                    {
+                    braveBook.Dungeons[i] = new BraveTarget {
                         Name = name,
                         ZoneName = zoneName,
-                        ZoneID = zoneID,
+                        ZoneId = zoneId,
                         LocationName = locationName,
                         Position = position,
-                        ContentsFinderConditionID = cfcID,
+                        ContentsFinderConditionId = cfcId,
                     };
                 }
 
-                for (var i = 0; i < fateCount; i++)
-                {
+                for (var i = 0; i < fateCount; i++) {
                     var fate = bookRow.Fate[i].Fate.Value!;
-                    var fateID = fate.RowId;
+                    var fateId = fate.RowId;
 
-                    var position = GetFatePosition(fateID);
+                    var position = GetFatePosition(fateId);
 
                     var zoneName = position.TerritoryType.PlaceName.Value!.Name.ToString();
-                    var zoneID = position.TerritoryType.RowId;
+                    var zoneId = position.TerritoryType.RowId;
 
                     var name = fate.Name;
 
                     // Service.PluginLog.Debug($"Loaded fate {fateID}: {name}");
-                    braveBook.Fates[i] = new BraveTarget()
-                    {
+                    braveBook.Fates[i] = new BraveTarget {
                         Name = name,
                         ZoneName = zoneName,
-                        ZoneID = zoneID,
+                        ZoneId = zoneId,
                         LocationName = string.Empty,
                         Position = position,
                     };
                 }
 
-                for (var i = 0; i < leveCount; i++)
-                {
+                for (var i = 0; i < leveCount; i++) {
                     var leve = bookRow.Leve[i].Value!;
-                    var leveID = leve.RowId;
-                    var leveType = leve.LeveAssignmentType.Value!;
+                    var leveId = leve.RowId;
+                    // var leveType = leve.LeveAssignmentType.Value!;
                     var leveName = leve.Name.ToString();
 
-                    var position = GetLevePosition(leveID);
-                    var issuerName = GetLeveIssuer(leveID);
+                    var position = GetLevePosition(leveId);
+                    var issuerName = GetLeveIssuer(leveId);
 
                     var zoneName = position.TerritoryType.PlaceName.Value!.Name.ToString();
-                    var zoneID = position.TerritoryType.RowId;
+                    var zoneId = position.TerritoryType.RowId;
 
                     // Service.PluginLog.Debug($"Loaded leve {leveID}: {name}");
-                    braveBook.Leves[i] = new BraveTarget()
-                    {
+                    braveBook.Leves[i] = new BraveTarget {
                         Name = leveName,
                         Issuer = issuerName,
                         ZoneName = zoneName,
-                        ZoneID = zoneID,
+                        ZoneId = zoneId,
                         LocationName = string.Empty,
                         Position = position,
                     };
                 }
             }
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             Service.PluginLog.Error(ex, "An error occurred during plugin data load.");
             throw;
         }
     }
 
-    private static MapLinkPayload GetMonsterPosition(uint monsterTargetID)
-    {
-        return monsterTargetID switch
-        {
+    private static MapLinkPayload GetMonsterPosition(uint monsterTargetId) {
+        return monsterTargetId switch {
             #pragma warning disable format,SA1008
             356 => new MapLinkPayload( 152,   5, 29.1f, 15.3f), // sylpheed screech        // East Shroud
             357 => new MapLinkPayload( 156,  25, 17.0f, 16.0f), // daring harrier          // Mor Dhona
@@ -312,15 +296,13 @@ internal struct BraveBook
             464 => new MapLinkPayload(1040,  54, 11.2f, 11.3f), // Lady Amandine           // Haukke Manor
             465 => new MapLinkPayload( 162,  46,  6.1f, 11.7f), // Tangata                 // Halatali
             #pragma warning restore format,SA1008
-            _ => throw new ArgumentException($"Unregistered MonsterNoteTarget: {monsterTargetID}"),
+            _ => throw new ArgumentException($"Unregistered MonsterNoteTarget: {monsterTargetId}"),
         };
     }
 
-    private static MapLinkPayload GetFatePosition(uint fateID)
-    {
-        return fateID switch
-        {
-            #pragma warning disable format
+    private static MapLinkPayload GetFatePosition(uint fateId)
+        => fateId switch {
+#pragma warning disable format
             317 => new MapLinkPayload(139, 19, 26.8f, 18.2f), // Surprise                   // Upper La Noscea
             424 => new MapLinkPayload(146, 23, 21.0f, 16.0f), // Heroes of the 2nd          // Southern Thanalan
             430 => new MapLinkPayload(146, 23, 24.0f, 26.0f), // Return to Cinder           // Southern Thanalan
@@ -348,16 +330,13 @@ internal struct BraveBook
             632 => new MapLinkPayload(154,  7, 21.0f, 19.0f), // Rude Awakening             // North Shroud
             633 => new MapLinkPayload(154,  7, 19.0f, 20.0f), // Air Supply                 // North Shroud
             642 => new MapLinkPayload(147, 24, 21.0f, 29.0f), // The Ceruleum Road          // Northern Thanalan
-            #pragma warning restore format
-            _ => throw new ArgumentException($"Unregistered FATE: {fateID}"),
+#pragma warning restore format
+            _ => throw new ArgumentException($"Unregistered FATE: {fateId}"),
         };
-    }
 
-    private static MapLinkPayload GetLevePosition(uint leveID)
-    {
-        return leveID switch
-        {
-            #pragma warning disable format
+    private static MapLinkPayload GetLevePosition(uint leveId)
+        => leveId switch {
+#pragma warning disable format
             643 => new MapLinkPayload(147, 24, 22.0f, 29.0f), // Subduing the Subprime           // Northern Thanalan
             644 => new MapLinkPayload(147, 24, 22.0f, 29.0f), // Necrologos: Pale Oblation       // Northern Thanalan
             645 => new MapLinkPayload(147, 24, 22.0f, 29.0f), // Don't Forget to Cry             // Northern Thanalan
@@ -381,15 +360,12 @@ internal struct BraveBook
             870 => new MapLinkPayload(156, 25, 31.0f, 12.0f), // Get off Our Lake                // Mor Dhona
             873 => new MapLinkPayload(156, 25, 31.0f, 12.0f), // Who Writes History              // Mor Dhona
             875 => new MapLinkPayload(156, 25, 31.0f, 12.0f), // The Museum Is Closed            // Mor Dhona
-            #pragma warning restore format
-            _ => throw new ArgumentException($"Unregistered leve: {leveID}"),
+#pragma warning restore format
+            _ => throw new ArgumentException($"Unregistered leve: {leveId}"),
         };
-    }
 
-    private static string GetLeveIssuer(uint leveID)
-    {
-        var (gcID, issuerName) = leveID switch
-        {
+    private static string GetLeveIssuer(uint leveId) {
+        var (gcId, issuerName) = leveId switch {
             643 => (0, "Rurubana"),
             644 => (0, "Rurubana"),
             645 => (0, "Rurubana"),
@@ -413,13 +389,13 @@ internal struct BraveBook
             870 => (2, "Eidhart"),
             875 => (3, "Eidhart"),
             873 => (3, "Eidhart"),
-            _ => throw new ArgumentException($"Unregistered leve: {leveID}"),
+            _ => throw new ArgumentException($"Unregistered leve: {leveId}"),
         };
 
         var gcName =
-            gcID == 1 ? "Maelstrom" :
-            gcID == 2 ? "Order of the Twin Adder" :
-            gcID == 3 ? "Immortal Flames" :
+            gcId == 1 ? "Maelstrom" :
+            gcId == 2 ? "Order of the Twin Adder" :
+            gcId == 3 ? "Immortal Flames" :
             string.Empty;
 
         if (gcName != string.Empty)
