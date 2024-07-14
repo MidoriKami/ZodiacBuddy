@@ -64,6 +64,10 @@ internal class ConfigWindow : Window {
         }
 
         ImGui.Spacing();
+
+        if (ImGui.Checkbox("Disable Teleport", ref Service.Configuration.DisableTeleport)) {
+            Service.Configuration.Save();
+        }
     }
 
     private void DrawInterface() {

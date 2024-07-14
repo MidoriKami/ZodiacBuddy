@@ -23,5 +23,7 @@ public class PluginConfiguration : IPluginConfiguration {
 
     public InformationWindowConfiguration InformationWindow { get; } = new();
 
+    public bool DisableTeleport = false;
+
     public void Save() => Service.Interface.SavePluginConfig(this);
 }
