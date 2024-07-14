@@ -43,6 +43,9 @@ internal class ConfigWindow : Window {
 
         if (ImGui.CollapsingHeader("Brave"))
             this.DrawBrave();
+        
+        if (Service.Interface.IsDevMenuOpen && ImGui.CollapsingHeader("Debug"))
+            this.Debug();
     }
 
     private void DrawGeneral() {
@@ -212,5 +215,11 @@ internal class ConfigWindow : Window {
         }
 
         ImGui.Spacing();
+    }
+    
+    private void Debug()
+    {
+        if (ImGui.Button("Check duties territory"))
+            DebugTools.CheckBonusLightDutyTerritories();
     }
 }
