@@ -79,6 +79,7 @@ internal class AtmaManager : IDisposable {
 
     private unsafe void Teleport(uint aetheryteId) {
         if (Service.ClientState.LocalPlayer == null) return;
+        if (Service.Configuration.DisableTeleport) return;
 
         var telepo = Telepo.Instance();
         if (telepo == null) {
