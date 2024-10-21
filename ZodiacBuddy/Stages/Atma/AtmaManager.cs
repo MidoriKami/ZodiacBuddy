@@ -153,8 +153,7 @@ internal class AtmaManager : IDisposable {
             : selectedTarget.ZoneName;
 
         // Service.PluginLog.Debug($"Target selected: {selectedTarget.Name} in {zoneName}.");
-        if (Service.Configuration.BraveEchoTarget)
-        {
+        if (Service.Configuration.BraveEchoTarget) {
             var sb = new SeStringBuilder()
                 .AddText("Target selected: ")
                 .AddUiForeground(62)

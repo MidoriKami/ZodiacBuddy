@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Lumina.Excel.GeneratedSheets2;
 
 namespace ZodiacBuddy.Stages.Atma.Data;
 
@@ -54,7 +55,7 @@ internal struct BraveBook {
     /// </summary>
     private static void PopulateDataset() {
         try {
-            var relicNoteSheet = Service.DataManager.GetExcelSheet<Excel.RelicNote>()!;
+            var relicNoteSheet = Service.DataManager.GetExcelSheet<RelicNote>()!;
 
             foreach (var bookRow in relicNoteSheet) {
                 var eventItem = bookRow.EventItem.Value;
@@ -70,8 +71,7 @@ internal struct BraveBook {
                 var leveCount = bookRow.Leve.Length;
 
                 // Service.PluginLog.Debug($"Loading book {bookID}: {bookName}");
-                var braveBook = Dataset[bookRow.RowId] = new BraveBook()
-                {
+                var braveBook = Dataset[bookRow.RowId] = new BraveBook {
                     Name = bookName,
                     Enemies = new BraveTarget[enemyCount],
                     Dungeons = new BraveTarget[dungeonCount],
@@ -80,22 +80,21 @@ internal struct BraveBook {
                 };
 
                 for (var i = 0; i < enemyCount; i++) {
-                    var mntc = bookRow.MonsterNoteTargetCommon[i].MonsterNoteTargetCommon.Value!;
+                    var mntc = bookRow.MonsterNoteTargetCommon[i].Value!;
                     // var mntcID = mntc.RowId;
 
-                    var zoneRow = mntc.PlaceName[0].Zone.Value!;
+                    var zoneRow = mntc.PlaceNameZone[0].Value!;
                     var zoneName = zoneRow.Name.ToString();
                     var zoneId = zoneRow.RowId;
 
-                    var locationName = mntc.PlaceName[0].Location.Value!.Name.ToString();
+                    var locationName = mntc.PlaceNameLocation[0].Value!.Name.ToString();
 
                     var name = mntc.BNpcName.Value!.Singular.ToString();
 
                     var position = GetMonsterPosition(mntc.RowId);
 
                     // Service.PluginLog.Debug($"Loaded enemy {mntcID}: {name}");
-                    braveBook.Enemies[i] = new BraveTarget()
-                    {
+                    braveBook.Enemies[i] = new BraveTarget {
                         Name = name,
                         ZoneName = zoneName,
                         ZoneId = zoneId,
@@ -108,11 +107,11 @@ internal struct BraveBook {
                     var mntc = bookRow.MonsterNoteTargetNM[i].Value!;
                     // var mntcID = mntc.RowId;
 
-                    var zoneRow = mntc.PlaceName[0].Zone.Value!;
+                    var zoneRow = mntc.PlaceNameZone[0].Value!;
                     var zoneName = zoneRow.Name.ToString();
                     var zoneId = zoneRow.RowId;
 
-                    var locationName = mntc.PlaceName[0].Location.Value!.Name.ToString();
+                    var locationName = mntc.PlaceNameLocation[0].Value!.Name.ToString();
 
                     var name = mntc.BNpcName.Value!.Singular;
 
@@ -132,7 +131,7 @@ internal struct BraveBook {
                 }
 
                 for (var i = 0; i < fateCount; i++) {
-                    var fate = bookRow.Fate[i].Fate.Value!;
+                    var fate = bookRow.Fate[i].Value!;
                     var fateId = fate.RowId;
 
                     var position = GetFatePosition(fateId);
@@ -184,7 +183,6 @@ internal struct BraveBook {
 
     private static MapLinkPayload GetMonsterPosition(uint monsterTargetId) {
         return monsterTargetId switch {
-            #pragma warning disable format,SA1008
             356 => new MapLinkPayload( 152,   5, 29.1f, 15.3f), // sylpheed screech        // East Shroud
             357 => new MapLinkPayload( 156,  25, 17.0f, 16.0f), // daring harrier          // Mor Dhona
             358 => new MapLinkPayload( 155,  53, 13.8f, 27.0f), // giant logger            // Coerthas Central Highlands
@@ -295,14 +293,12 @@ internal struct BraveBook {
             463 => new MapLinkPayload( 172,  38,  3.1f,  8.7f), // Miser's Mistress        // Aurum Vale
             464 => new MapLinkPayload(1040,  54, 11.2f, 11.3f), // Lady Amandine           // Haukke Manor
             465 => new MapLinkPayload( 162,  46,  6.1f, 11.7f), // Tangata                 // Halatali
-            #pragma warning restore format,SA1008
             _ => throw new ArgumentException($"Unregistered MonsterNoteTarget: {monsterTargetId}"),
         };
     }
 
     private static MapLinkPayload GetFatePosition(uint fateId)
         => fateId switch {
-#pragma warning disable format
             317 => new MapLinkPayload(139, 19, 26.8f, 18.2f), // Surprise                   // Upper La Noscea
             424 => new MapLinkPayload(146, 23, 21.0f, 16.0f), // Heroes of the 2nd          // Southern Thanalan
             430 => new MapLinkPayload(146, 23, 24.0f, 26.0f), // Return to Cinder           // Southern Thanalan
@@ -330,13 +326,11 @@ internal struct BraveBook {
             632 => new MapLinkPayload(154,  7, 21.0f, 19.0f), // Rude Awakening             // North Shroud
             633 => new MapLinkPayload(154,  7, 19.0f, 20.0f), // Air Supply                 // North Shroud
             642 => new MapLinkPayload(147, 24, 21.0f, 29.0f), // The Ceruleum Road          // Northern Thanalan
-#pragma warning restore format
             _ => throw new ArgumentException($"Unregistered FATE: {fateId}"),
         };
 
     private static MapLinkPayload GetLevePosition(uint leveId)
         => leveId switch {
-#pragma warning disable format
             643 => new MapLinkPayload(147, 24, 22.0f, 29.0f), // Subduing the Subprime           // Northern Thanalan
             644 => new MapLinkPayload(147, 24, 22.0f, 29.0f), // Necrologos: Pale Oblation       // Northern Thanalan
             645 => new MapLinkPayload(147, 24, 22.0f, 29.0f), // Don't Forget to Cry             // Northern Thanalan
@@ -360,7 +354,6 @@ internal struct BraveBook {
             870 => new MapLinkPayload(156, 25, 31.0f, 12.0f), // Get off Our Lake                // Mor Dhona
             873 => new MapLinkPayload(156, 25, 31.0f, 12.0f), // Who Writes History              // Mor Dhona
             875 => new MapLinkPayload(156, 25, 31.0f, 12.0f), // The Museum Is Closed            // Mor Dhona
-#pragma warning restore format
             _ => throw new ArgumentException($"Unregistered leve: {leveId}"),
         };
 
@@ -393,10 +386,12 @@ internal struct BraveBook {
         };
 
         var gcName =
-            gcId == 1 ? "Maelstrom" :
-            gcId == 2 ? "Order of the Twin Adder" :
-            gcId == 3 ? "Immortal Flames" :
-            string.Empty;
+            gcId switch {
+                1 => "Maelstrom",
+                2 => "Order of the Twin Adder",
+                3 => "Immortal Flames",
+                _ => string.Empty,
+            };
 
         if (gcName != string.Empty)
             issuerName += $" ({gcName})";

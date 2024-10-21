@@ -221,8 +221,7 @@ internal class ConfigWindow : Window {
         ImGui.Spacing();
     }
     
-    private void Debug()
-    {
+    private void Debug() {
         if (ImGui.Button("Check duties territory"))
             DebugTools.CheckBonusLightDutyTerritories();
     }
