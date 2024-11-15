@@ -8,9 +8,9 @@ using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using Lumina.Excel.Sheets;
 using ZodiacBuddy.Stages.Atma.Data;
-
-using Sheets = Lumina.Excel.GeneratedSheets;
+using RelicNote = FFXIVClientStructs.FFXIV.Client.Game.UI.RelicNote;
 
 namespace ZodiacBuddy.Stages.Atma;
 
@@ -41,22 +41,25 @@ internal class AtmaManager : IDisposable {
             return (41.0f / c * ((scaledPos + 1024.0f) / 2048.0f)) + 1.0f;
         }
 
-        var aetherytes = Service.DataManager.GetExcelSheet<Sheets.Aetheryte>()!;
-        var mapMarkers = Service.DataManager.GetExcelSheet<Sheets.MapMarker>()!;
+        var aetherytes = Service.DataManager.GetExcelSheet<Aetheryte>();
+        var mapMarkers = Service.DataManager.GetSubrowExcelSheet<MapMarker>();
 
         foreach (var aetheryte in aetherytes) {
             if (!aetheryte.IsAetheryte)
                 continue;
 
-            if (aetheryte.Territory.Value?.RowId != mapLink.TerritoryType.RowId)
+            if (aetheryte.Territory.Value.RowId != mapLink.TerritoryType.RowId)
                 continue;
 
-            var map = aetheryte.Map.Value!;
+            var map = aetheryte.Map.Value;
             var scale = map.SizeFactor;
-            var name = map.PlaceName.Value!.Name.ToString();
+            var name = map.PlaceName.Value.Name.ToString();
 
-            var mapMarker = mapMarkers.FirstOrDefault(m => m.DataType == 3 && m.DataKey == aetheryte.RowId);
-            if (mapMarker == default) {
+            var mapMarker = mapMarkers
+	            .SelectMany(markers => markers)
+	            .FirstOrDefault(m => m.DataType == 3 && m.DataKey.RowId == aetheryte.RowId);
+            
+            if (mapMarker.RowId is 0) {
                 Service.PluginLog.Debug($"Could not find aetheryte: {name}");
                 return 0;
             }

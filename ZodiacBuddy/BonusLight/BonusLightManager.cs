@@ -104,11 +104,11 @@ public class BonusLightManager : IDisposable {
         if (Service.ClientState.LocalPlayer == null)
             return;
 
-        if (Service.ClientState.LocalPlayer.HomeWorld.GameData == null)
+        if (Service.ClientState.LocalPlayer.HomeWorld is { RowId: 0 })
             return;
 
-        var datacenter = Service.ClientState.LocalPlayer.HomeWorld.GameData.DataCenter.Row;
-        var world = Service.ClientState.LocalPlayer.HomeWorld.Id;
+        var datacenter = Service.ClientState.LocalPlayer.HomeWorld.Value.DataCenter.RowId;
+        var world = Service.ClientState.LocalPlayer.HomeWorld.RowId;
 
         var report = new Report(datacenter, world, territoryId, detectionTime);
         var content = JsonConvert.SerializeObject(report);
@@ -143,7 +143,7 @@ public class BonusLightManager : IDisposable {
 
         if (LightConfiguration.PlaySoundOnLightBonusNotification) {
             var soundId = (uint)LightConfiguration.LightBonusNotificationSound;
-            UIModule.PlayChatSoundEffect(soundId);
+            UIGlobals.PlayChatSoundEffect(soundId);
         }
     }
 
@@ -158,7 +158,7 @@ public class BonusLightManager : IDisposable {
             if (Service.ClientState.LocalPlayer == null)
                 return;
 
-            if (Service.ClientState.LocalPlayer.HomeWorld.GameData == null)
+            if (Service.ClientState.LocalPlayer.HomeWorld.RowId is 0)
                 return;
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUri}/reports/active");
@@ -173,7 +173,7 @@ public class BonusLightManager : IDisposable {
             new Timer(_ => this.RetrieveLastReport(), null, TimeSpan.FromSeconds(2), TimeSpan.FromMinutes(5));
     }
 
-    private void OnLogout() {
+    private void OnLogout(int type, int code) {
         this.checkTimer?.Dispose();
         this.ResetBonus();
     }

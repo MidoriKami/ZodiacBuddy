@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Lumina.Excel.GeneratedSheets2;
+using Lumina.Excel.Sheets;
 
 namespace ZodiacBuddy.Stages.Atma.Data;
 
@@ -55,20 +55,20 @@ internal struct BraveBook {
     /// </summary>
     private static void PopulateDataset() {
         try {
-            var relicNoteSheet = Service.DataManager.GetExcelSheet<RelicNote>()!;
+            var relicNoteSheet = Service.DataManager.GetExcelSheet<RelicNote>();
 
             foreach (var bookRow in relicNoteSheet) {
                 var eventItem = bookRow.EventItem.Value;
-                if (eventItem == null)
+                if (eventItem.RowId is 0)
                     continue;
 
                 // var bookId = bookRow.RowId;
                 var bookName = eventItem.Name.ToString();
 
-                var enemyCount = bookRow.MonsterNoteTargetCommon.Length;
-                var dungeonCount = bookRow.MonsterNoteTargetNM.Length;
-                var fateCount = bookRow.Fate.Length;
-                var leveCount = bookRow.Leve.Length;
+                var enemyCount = bookRow.MonsterNoteTargetCommon.Count;
+                var dungeonCount = bookRow.MonsterNoteTargetNM.Count;
+                var fateCount = bookRow.Fate.Count;
+                var leveCount = bookRow.Leve.Count;
 
                 // Service.PluginLog.Debug($"Loading book {bookID}: {bookName}");
                 var braveBook = Dataset[bookRow.RowId] = new BraveBook {
@@ -80,16 +80,16 @@ internal struct BraveBook {
                 };
 
                 for (var i = 0; i < enemyCount; i++) {
-                    var mntc = bookRow.MonsterNoteTargetCommon[i].Value!;
+                    var mntc = bookRow.MonsterNoteTargetCommon[i].Value;
                     // var mntcID = mntc.RowId;
 
-                    var zoneRow = mntc.PlaceNameZone[0].Value!;
+                    var zoneRow = mntc.PlaceNameZone[0].Value;
                     var zoneName = zoneRow.Name.ToString();
                     var zoneId = zoneRow.RowId;
 
-                    var locationName = mntc.PlaceNameLocation[0].Value!.Name.ToString();
+                    var locationName = mntc.PlaceNameLocation[0].Value.Name.ToString();
 
-                    var name = mntc.BNpcName.Value!.Singular.ToString();
+                    var name = mntc.BNpcName.Value.Singular.ToString();
 
                     var position = GetMonsterPosition(mntc.RowId);
 
@@ -104,24 +104,24 @@ internal struct BraveBook {
                 }
 
                 for (var i = 0; i < dungeonCount; i++) {
-                    var mntc = bookRow.MonsterNoteTargetNM[i].Value!;
+                    var mntc = bookRow.MonsterNoteTargetNM[i].Value;
                     // var mntcID = mntc.RowId;
 
-                    var zoneRow = mntc.PlaceNameZone[0].Value!;
-                    var zoneName = zoneRow.Name.ToString();
+                    var zoneRow = mntc.PlaceNameZone[0].Value;
+                    var zoneName = zoneRow.Name.ExtractText();
                     var zoneId = zoneRow.RowId;
 
-                    var locationName = mntc.PlaceNameLocation[0].Value!.Name.ToString();
+                    var locationName = mntc.PlaceNameLocation[0].Value.Name.ExtractText();
 
-                    var name = mntc.BNpcName.Value!.Singular;
+                    var name = mntc.BNpcName.Value.Singular;
 
                     var position = GetMonsterPosition(mntc.RowId);
 
-                    var cfcId = position.TerritoryType.ContentFinderCondition.Value!.RowId;
+                    var cfcId = position.TerritoryType.Value.ContentFinderCondition.Value.RowId;
 
                     // Service.PluginLog.Debug($"Loaded dungeon {mntcID}: {name}");
                     braveBook.Dungeons[i] = new BraveTarget {
-                        Name = name,
+                        Name = name.ExtractText(),
                         ZoneName = zoneName,
                         ZoneId = zoneId,
                         LocationName = locationName,
@@ -131,19 +131,19 @@ internal struct BraveBook {
                 }
 
                 for (var i = 0; i < fateCount; i++) {
-                    var fate = bookRow.Fate[i].Value!;
+                    var fate = bookRow.Fate[i].Value;
                     var fateId = fate.RowId;
 
                     var position = GetFatePosition(fateId);
 
-                    var zoneName = position.TerritoryType.PlaceName.Value!.Name.ToString();
+                    var zoneName = position.TerritoryType.Value.PlaceName.Value.Name.ExtractText();
                     var zoneId = position.TerritoryType.RowId;
 
                     var name = fate.Name;
 
                     // Service.PluginLog.Debug($"Loaded fate {fateID}: {name}");
                     braveBook.Fates[i] = new BraveTarget {
-                        Name = name,
+                        Name = name.ExtractText(),
                         ZoneName = zoneName,
                         ZoneId = zoneId,
                         LocationName = string.Empty,
@@ -152,7 +152,7 @@ internal struct BraveBook {
                 }
 
                 for (var i = 0; i < leveCount; i++) {
-                    var leve = bookRow.Leve[i].Value!;
+                    var leve = bookRow.Leve[i].Value;
                     var leveId = leve.RowId;
                     // var leveType = leve.LeveAssignmentType.Value!;
                     var leveName = leve.Name.ToString();
@@ -160,7 +160,7 @@ internal struct BraveBook {
                     var position = GetLevePosition(leveId);
                     var issuerName = GetLeveIssuer(leveId);
 
-                    var zoneName = position.TerritoryType.PlaceName.Value!.Name.ToString();
+                    var zoneName = position.TerritoryType.Value.PlaceName.Value.Name.ExtractText();
                     var zoneId = position.TerritoryType.RowId;
 
                     // Service.PluginLog.Debug($"Loaded leve {leveID}: {name}");

@@ -160,7 +160,7 @@ internal class ConfigWindow : Window {
 
         ImGui.SameLine();
         if (ImGui.Button("Play sound##LightBonusSound"))
-            UIModule.PlayChatSoundEffect((uint)soundId);
+	        UIGlobals.PlayChatSoundEffect((uint)soundId);
 
         ImGui.Spacing();
     }

@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-
-using Dalamud.Utility;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace ZodiacBuddy.BonusLight;
 
@@ -97,11 +95,9 @@ public class BonusLightDuty {
     private BonusLightDuty(uint territoryId, uint defaultLightIntensity) {
         this.DefaultLightIntensity = defaultLightIntensity;
 
-        this.DutyName = Service.DataManager.Excel.GetSheet<TerritoryType>()!
-            .GetRow(territoryId)!
-            .ContentFinderCondition.Value!.Name
-            .ToDalamudString()
-            .ToString();
+        this.DutyName = Service.DataManager.Excel.GetSheet<TerritoryType>()
+	        .GetRow(territoryId)
+	        .ContentFinderCondition.Value.Name.ExtractText();
     }
 
     /// <summary>
