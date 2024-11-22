@@ -58,9 +58,9 @@ internal struct BraveBook {
             var relicNoteSheet = Service.DataManager.GetExcelSheet<RelicNote>();
 
             foreach (var bookRow in relicNoteSheet) {
-                var eventItem = bookRow.EventItem.Value;
-                if (eventItem.RowId is 0)
+                if (!bookRow.EventItem.IsValid)
                     continue;
+                var eventItem = bookRow.EventItem.Value;
 
                 // var bookId = bookRow.RowId;
                 var bookName = eventItem.Name.ToString();
