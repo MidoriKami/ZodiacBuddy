@@ -63,7 +63,7 @@ internal struct BraveBook {
                 var eventItem = bookRow.EventItem.Value;
 
                 // var bookId = bookRow.RowId;
-                var bookName = eventItem.Name.ToString();
+                var bookName = eventItem.Name.ExtractText();
 
                 var enemyCount = bookRow.MonsterNoteTargetCommon.Count;
                 var dungeonCount = bookRow.MonsterNoteTargetNM.Count;
@@ -84,12 +84,12 @@ internal struct BraveBook {
                     // var mntcID = mntc.RowId;
 
                     var zoneRow = mntc.PlaceNameZone[0].Value;
-                    var zoneName = zoneRow.Name.ToString();
+                    var zoneName = zoneRow.Name.ExtractText();
                     var zoneId = zoneRow.RowId;
 
-                    var locationName = mntc.PlaceNameLocation[0].Value.Name.ToString();
+                    var locationName = mntc.PlaceNameLocation[0].Value.Name.ExtractText();
 
-                    var name = mntc.BNpcName.Value.Singular.ToString();
+                    var name = mntc.BNpcName.Value.Singular.ExtractText();
 
                     var position = GetMonsterPosition(mntc.RowId);
 
@@ -155,7 +155,7 @@ internal struct BraveBook {
                     var leve = bookRow.Leve[i].Value;
                     var leveId = leve.RowId;
                     // var leveType = leve.LeveAssignmentType.Value!;
-                    var leveName = leve.Name.ToString();
+                    var leveName = leve.Name.ExtractText();
 
                     var position = GetLevePosition(leveId);
                     var issuerName = GetLeveIssuer(leveId);

@@ -1,5 +1,4 @@
-﻿using Dalamud.Utility;
-using Lumina.Excel.Sheets;
+﻿using Lumina.Excel.Sheets;
 
 namespace ZodiacBuddy.BonusLight;
 
@@ -15,9 +14,8 @@ public class BonusLightLevel {
     public BonusLightLevel(uint intensity, uint rowId) {
         this.Intensity = intensity;
         this.Message = Service.DataManager.Excel.GetSheet<LogMessage>()
-            .GetRow(rowId)
-            .Text.ToDalamudString()
-            .ToString().Trim();
+	        .GetRow(rowId)
+	        .Text.ExtractText();
     }
 
     /// <summary>

@@ -69,9 +69,7 @@ public sealed class ZodiacBuddyPlugin : IDalamudPlugin {
     /// <param name="message">Message to send.</param>
     public void PrintMessage(SeString message) {
         var sb = new SeStringBuilder()
-            .AddUiForeground(45)
-            .AddText("[ZodiacBuddy] ")
-            .AddUiForegroundOff()
+            .AddUiForeground("[ZodiacBuddy] ", 45)
             .Append(message);
 
         Service.ChatGui.Print(new XivChatEntry {

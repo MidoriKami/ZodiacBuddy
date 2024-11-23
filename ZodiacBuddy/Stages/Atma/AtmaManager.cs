@@ -53,7 +53,7 @@ internal class AtmaManager : IDisposable {
 
             var map = aetheryte.Map.Value;
             var scale = map.SizeFactor;
-            var name = map.PlaceName.Value.Name.ToString();
+            var name = map.PlaceName.Value.Name.ExtractText();
 
             var mapMarker = mapMarkers
 	            .SelectMany(markers => markers)
@@ -84,24 +84,7 @@ internal class AtmaManager : IDisposable {
         if (Service.ClientState.LocalPlayer == null) return;
         if (Service.Configuration.DisableTeleport) return;
 
-        var telepo = Telepo.Instance();
-        if (telepo == null) {
-            ZodiacBuddyPlugin.PrintError("Something horrible happened, please contact the developer.");
-            Service.PluginLog.Error("Could not teleport: Telepo is missing.");
-            return;
-        }
-
-        if (telepo->TeleportList.Count == 0)
-            telepo->UpdateAetheryteList();
-
-        foreach (var aetheryte in telepo->TeleportList) {
-            if (aetheryte.AetheryteId == aetheryteId) {
-                telepo->Teleport(aetheryteId, 0);
-                return;
-            }
-        }
-
-        ZodiacBuddyPlugin.PrintError("Could not teleport, not attuned.");
+        Telepo.Instance()->Teleport(aetheryteId, 0);
     }
 
     private unsafe void ReceiveEventDetour(AddonEvent type, AddonArgs args) {
@@ -157,11 +140,9 @@ internal class AtmaManager : IDisposable {
 
         // Service.PluginLog.Debug($"Target selected: {selectedTarget.Name} in {zoneName}.");
         if (Service.Configuration.BraveEchoTarget) {
-            var sb = new SeStringBuilder()
-                .AddText("Target selected: ")
-                .AddUiForeground(62)
-                .AddText(selectedTarget.Name)
-                .AddUiForegroundOff();
+	        var sb = new SeStringBuilder()
+		        .AddText("Target selected: ")
+		        .AddUiForeground(selectedTarget.Name, 62);
 
             if (index == 3) // leves
                 sb.AddText($" from {selectedTarget.Issuer}");
@@ -188,6 +169,6 @@ internal class AtmaManager : IDisposable {
         return;
 
         static bool IsOwnerNode(AtkEventTarget* target, AtkComponentCheckBox* checkbox)
-            => target == checkbox->AtkComponentButton.AtkComponentBase.OwnerNode;
+            => target == checkbox->AtkComponentButton.OwnerNode;
     }
 }

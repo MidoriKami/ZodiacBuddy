@@ -18,9 +18,7 @@ public static class DebugTools {
             if (string.IsNullOrWhiteSpace(bonusLightDuty.Value.DutyName)) {
                     
                 var sb = new SeStringBuilder()
-                    .AddUiForeground(45)
-                    .AddText("[ZodiacBuddy] ")
-                    .AddUiForegroundOff()
+	                .AddUiForeground("[ZodiacBuddy] ", 45)
                     .Append($"Invalid territory id {bonusLightDuty.Key}");
                     
                 Service.ChatGui.Print(new XivChatEntry {
