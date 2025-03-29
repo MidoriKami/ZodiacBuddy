@@ -22,14 +22,14 @@ public class BraveWindow() : InformationWindow.InformationWindow("Zodiac Brave I
 
         ImGui.PushStyleColor(ImGuiCol.PlotHistogram, InfoWindowConfiguration.ProgressColor);
 
-        var mahatmaValue = (item.Spiritbond / 500) + 1;
-        if (item.Spiritbond == 0)
+        var mahatmaValue = (item.SpiritbondOrCollectability / 500) + 1;
+        if (item.SpiritbondOrCollectability == 0)
             mahatmaValue = 0;
 
         var mahatmaProgress = mahatmaValue / 12f;
         ImGui.ProgressBar(mahatmaProgress, DetermineProgressSize(name), $"{mahatmaValue}/12");
 
-        var value = item.Spiritbond % 500;
+        var value = item.SpiritbondOrCollectability % 500;
         if (value == 1)
             value -= 1;
 

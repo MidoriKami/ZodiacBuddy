@@ -11,6 +11,7 @@ using LitJWT.Algorithms;
 using Newtonsoft.Json;
 using ZodiacBuddy.Stages.Brave;
 using ZodiacBuddy.Stages.Novus;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 
 namespace ZodiacBuddy.BonusLight;
 
@@ -42,10 +43,10 @@ public class BonusLightManager : IDisposable {
             ? TimeSpan.FromHours(timeOfDay.Hours + 2)
             : TimeSpan.FromHours(timeOfDay.Hours + 1);
         var delta = nextEvenHour - timeOfDay;
-
+            
         Service.ClientState.Login += this.OnLogin;
         Service.ClientState.Logout += this.OnLogout;
-        if (Service.ClientState.LocalPlayer is not null) this.OnLogin();
+        if (Service.Framework.RunOnFrameworkThread(() => Service.ClientState.LocalPlayer) is not null) this.OnLogin();
         this.resetTimer = new Timer(_ => this.ResetBonus(), null, delta, TimeSpan.FromHours(2));
     }
 
@@ -208,7 +209,7 @@ public class BonusLightManager : IDisposable {
     }
 
     private void Send(HttpRequestMessage request, Action<string>? successCallback) {
-        Task.Run(async () => {
+        System.Threading.Tasks.Task.Run(async () => {
             try {
                 var response = await this.httpClient.SendAsync(request);
                 var content = await response.Content.ReadAsStringAsync();

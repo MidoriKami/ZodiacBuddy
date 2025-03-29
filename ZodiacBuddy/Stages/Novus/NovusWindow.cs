@@ -22,7 +22,7 @@ public class NovusWindow() : InformationWindow.InformationWindow("Novus Zodiac I
 
         ImGui.PushStyleColor(ImGuiCol.PlotHistogram, InfoWindowConfiguration.ProgressColor);
 
-        var value = item.Spiritbond;
+        var value = item.SpiritbondOrCollectability;
         var progress = value / 2000f;
         ImGui.ProgressBar(progress, DetermineProgressSize(name), $"{value}/2000");
 

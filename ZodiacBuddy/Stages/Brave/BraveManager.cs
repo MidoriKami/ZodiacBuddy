@@ -70,7 +70,7 @@ internal class BraveManager : IDisposable {
             return;
 
         if (Configuration.ShowNumbersInRelicMagicite) {
-            var value = item.Spiritbond % 500;
+            var value = item.SpiritbondOrCollectability % 500;
             lightText->SetText($"{lightText->NodeText}\n{value / 2}/40");
         }
 

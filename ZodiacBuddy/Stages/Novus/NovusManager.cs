@@ -80,7 +80,7 @@ internal class NovusManager : IDisposable {
             return;
 
         if (Configuration.ShowNumbersInRelicGlass) {
-            var value = item.Spiritbond;
+            var value = item.SpiritbondOrCollectability;
             lightText->SetText($"{lightText->NodeText} {value}/2000");
         }
 
