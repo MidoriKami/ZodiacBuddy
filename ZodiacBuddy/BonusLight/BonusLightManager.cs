@@ -45,7 +45,11 @@ public class BonusLightManager : IDisposable {
 
         Service.ClientState.Login += this.OnLogin;
         Service.ClientState.Logout += this.OnLogout;
-        if (Service.ClientState.LocalPlayer is not null) this.OnLogin();
+        
+        if (Service.ClientState.IsLoggedIn) {
+	        this.OnLogin();
+        }
+        
         this.resetTimer = new Timer(_ => this.ResetBonus(), null, delta, TimeSpan.FromHours(2));
     }
 
@@ -169,8 +173,7 @@ public class BonusLightManager : IDisposable {
 
     private void OnLogin() {
         this.checkTimer?.Dispose();
-        this.checkTimer =
-            new Timer(_ => this.RetrieveLastReport(), null, TimeSpan.FromSeconds(2), TimeSpan.FromMinutes(5));
+        this.checkTimer = new Timer(_ => this.RetrieveLastReport(), null, TimeSpan.FromSeconds(2), TimeSpan.FromMinutes(5));
     }
 
     private void OnLogout(int type, int code) {
