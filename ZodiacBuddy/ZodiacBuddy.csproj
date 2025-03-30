@@ -3,7 +3,7 @@
     <Authors>daemitus, MidoriKami</Authors>
     <Description>Complete your Zodiac relic with style.</Description>
     <PackageProjectUrl>https://github.com/MidoriKami/ZodiacBuddy</PackageProjectUrl>
-    <Version>1.1.1.0</Version>
+    <Version>1.1.1.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
