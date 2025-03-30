@@ -63,7 +63,7 @@ internal struct BraveBook {
                 var eventItem = bookRow.EventItem.Value;
 
                 // var bookId = bookRow.RowId;
-                var bookName = eventItem.Name.ToString();
+                var bookName = eventItem.Name.ExtractText();
 
                 var enemyCount = bookRow.MonsterNoteTargetCommon.Count;
                 var dungeonCount = bookRow.MonsterNoteTargetNM.Count;
@@ -84,12 +84,12 @@ internal struct BraveBook {
                     // var mntcID = mntc.RowId;
 
                     var zoneRow = mntc.PlaceNameZone[0].Value;
-                    var zoneName = zoneRow.Name.ToString();
+                    var zoneName = zoneRow.Name.ExtractText();
                     var zoneId = zoneRow.RowId;
 
-                    var locationName = mntc.PlaceNameLocation[0].Value.Name.ToString();
+                    var locationName = mntc.PlaceNameLocation[0].Value.Name.ExtractText();
 
-                    var name = mntc.BNpcName.Value.Singular.ToString();
+                    var name = mntc.BNpcName.Value.Singular.ExtractText();
 
                     var position = GetMonsterPosition(mntc.RowId);
 
@@ -155,7 +155,7 @@ internal struct BraveBook {
                     var leve = bookRow.Leve[i].Value;
                     var leveId = leve.RowId;
                     // var leveType = leve.LeveAssignmentType.Value!;
-                    var leveName = leve.Name.ToString();
+                    var leveName = leve.Name.ExtractText();
 
                     var position = GetLevePosition(leveId);
                     var issuerName = GetLeveIssuer(leveId);
@@ -201,7 +201,7 @@ internal struct BraveBook {
             371 => new MapLinkPayload( 152,   5, 24.2f, 16.9f), // milkroot cluster        // East Shroud
             372 => new MapLinkPayload( 138,  18, 13.8f, 16.9f), // shelfscale Reaver       // Western La Noscea
             373 => new MapLinkPayload( 146,  23, 26.1f, 21.1f), // Zahar'ak archer         // Southern Thanalan
-            374 => new MapLinkPayload( 180,  30, 23.9f,  7.7f), // U'Ghamaro golem         // Outer La Noscea
+            374 => new MapLinkPayload( 180,  30, 27.4f,  7.1f), // U'Ghamaro golem         // Outer La Noscea
             375 => new MapLinkPayload( 155,  53, 33.9f, 21.6f), // Natalan boldwing        // Coerthas Central Highlands
             376 => new MapLinkPayload( 153,   6, 30.8f, 24.8f), // wild hog                // South Shroud
             377 => new MapLinkPayload( 156,  25, 17.0f, 16.0f), // hexing harrier          // Mor Dhona
@@ -307,7 +307,7 @@ internal struct BraveBook {
             486 => new MapLinkPayload(155, 53, 10.0f, 28.0f), // Tower of Power             // Coerthas Central Highlands
             493 => new MapLinkPayload(155, 53,  5.0f, 22.0f), // The Taste of Fear          // Coerthas Central Highlands
             499 => new MapLinkPayload(155, 53, 34.0f, 20.0f), // The Four Winds             // Coerthas Central Highlands
-            516 => new MapLinkPayload(156, 25, 15.0f, 13.0f), // Black and Nburu            // Mor Dhona
+            516 => new MapLinkPayload(156, 25, 15.7f, 14.3f), // Black and Nburu            // Mor Dhona
             517 => new MapLinkPayload(156, 25, 13.0f, 12.0f), // Good to Be Bud             // Mor Dhona
             521 => new MapLinkPayload(156, 25, 31.0f,  5.0f), // Another Notch on the Torch // Mor Dhona
             540 => new MapLinkPayload(145, 22, 26.0f, 24.0f), // Quartz Coupling            // Eastern Thanalan
