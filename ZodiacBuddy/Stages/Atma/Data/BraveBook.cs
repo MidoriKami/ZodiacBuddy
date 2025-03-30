@@ -279,7 +279,7 @@ internal struct BraveBook {
             449 => new MapLinkPayload(1041,  45, 10.6f,  6.5f), // Aiatar                  // Brayflox's Longstop
             450 => new MapLinkPayload( 159,  32, 12.7f,  2.5f), // tonberry king           // The Wanderer's Palace
             451 => new MapLinkPayload( 349, 142,  9.2f, 11.3f), // Ouranos                 // Copperbell Mines (Hard)
-            452 => new MapLinkPayload( 163,  43, 16.0f, 11.2f), // adjudicator             // The Sunken Temple of Qarn
+            452 => new MapLinkPayload( 1267,  43, 16.0f, 11.2f), // adjudicator             // The Sunken Temple of Qarn
             453 => new MapLinkPayload( 350, 138, 11.2f, 11.3f), // Halicarnassus           // Haukke Manor (Hard)
             454 => new MapLinkPayload( 360, 145,  6.1f, 11.6f), // Mumuepo the Beholden    // Halatali (Hard)
             455 => new MapLinkPayload(1038,  41,  9.2f, 11.3f), // Gyges the Great         // Copperbell Mines
@@ -292,7 +292,7 @@ internal struct BraveBook {
             462 => new MapLinkPayload(1036,  31,  4.9f, 17.7f), // Denn the Orcatoothed    // Sastasha
             463 => new MapLinkPayload( 172,  38,  3.1f,  8.7f), // Miser's Mistress        // Aurum Vale
             464 => new MapLinkPayload(1040,  54, 11.2f, 11.3f), // Lady Amandine           // Haukke Manor
-            465 => new MapLinkPayload( 162,  46,  6.1f, 11.7f), // Tangata                 // Halatali
+            465 => new MapLinkPayload( 1245,  46,  6.1f, 11.7f), // Tangata                 // Halatali
             _ => throw new ArgumentException($"Unregistered MonsterNoteTarget: {monsterTargetId}"),
         };
     }
