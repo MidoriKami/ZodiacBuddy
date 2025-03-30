@@ -307,7 +307,7 @@ internal struct BraveBook {
             486 => new MapLinkPayload(155, 53, 10.0f, 28.0f), // Tower of Power             // Coerthas Central Highlands
             493 => new MapLinkPayload(155, 53,  5.0f, 22.0f), // The Taste of Fear          // Coerthas Central Highlands
             499 => new MapLinkPayload(155, 53, 34.0f, 20.0f), // The Four Winds             // Coerthas Central Highlands
-            516 => new MapLinkPayload(156, 25, 15.0f, 13.0f), // Black and Nburu            // Mor Dhona
+            516 => new MapLinkPayload(156, 25, 15.7f, 14.3f), // Black and Nburu            // Mor Dhona
             517 => new MapLinkPayload(156, 25, 13.0f, 12.0f), // Good to Be Bud             // Mor Dhona
             521 => new MapLinkPayload(156, 25, 31.0f,  5.0f), // Another Notch on the Torch // Mor Dhona
             540 => new MapLinkPayload(145, 22, 26.0f, 24.0f), // Quartz Coupling            // Eastern Thanalan
