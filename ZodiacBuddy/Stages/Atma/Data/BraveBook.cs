@@ -201,7 +201,7 @@ internal struct BraveBook {
             371 => new MapLinkPayload( 152,   5, 24.2f, 16.9f), // milkroot cluster        // East Shroud
             372 => new MapLinkPayload( 138,  18, 13.8f, 16.9f), // shelfscale Reaver       // Western La Noscea
             373 => new MapLinkPayload( 146,  23, 26.1f, 21.1f), // Zahar'ak archer         // Southern Thanalan
-            374 => new MapLinkPayload( 180,  30, 23.9f,  7.7f), // U'Ghamaro golem         // Outer La Noscea
+            374 => new MapLinkPayload( 180,  30, 27.4f,  7.1f), // U'Ghamaro golem         // Outer La Noscea
             375 => new MapLinkPayload( 155,  53, 33.9f, 21.6f), // Natalan boldwing        // Coerthas Central Highlands
             376 => new MapLinkPayload( 153,   6, 30.8f, 24.8f), // wild hog                // South Shroud
             377 => new MapLinkPayload( 156,  25, 17.0f, 16.0f), // hexing harrier          // Mor Dhona
