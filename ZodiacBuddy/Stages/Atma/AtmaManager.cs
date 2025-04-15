@@ -152,6 +152,8 @@ internal class AtmaManager : IDisposable {
             Service.Plugin.PrintMessage(sb.BuiltString);
         }
 
+		ImGui.SetClipboardText(selectedTarget.Name);
+
         var aetheryteId = GetNearestAetheryte(selectedTarget.Position);
         if (aetheryteId == 0) {
             if (index == 1) {
