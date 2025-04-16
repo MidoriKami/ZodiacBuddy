@@ -15,6 +15,8 @@ public class PluginConfiguration : IPluginConfiguration {
 
     public bool BraveEchoTarget { get; set; } = true;
 
+    public bool BraveCopyTarget { get; set; } = true;
+
     public BonusLightConfiguration BonusLight { get; } = new();
 
     public NovusConfiguration Novus { get; } = new();

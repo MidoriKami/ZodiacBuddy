@@ -174,6 +174,11 @@ internal class ConfigWindow : Window {
             Service.Configuration.Save();
         }
 
+        var braveCopy = Service.Configuration.BraveCopyTarget;
+        if (ImGui.Checkbox("Copy name of target to clipboard automatically", ref braveCopy)) {
+            Service.Configuration.BraveCopyTarget = braveCopy;
+            Service.Configuration.Save();
+        }
         ImGui.Spacing();
     }
 
